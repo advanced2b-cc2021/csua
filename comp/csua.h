@@ -18,7 +18,11 @@ typedef struct CodegenVisitor_tag CodegenVisitor;
 typedef struct CS_Compiler_tag CS_Compiler;
 
 typedef struct TypeSpecifier_tag TypeSpecifier;
+typedef struct StatementList_tag StatementList;
 typedef struct Statement_tag Statement;
+typedef struct IfStatement_tag IfStatement;
+typedef struct ElsifStatement_tag ElsifStatement;
+typedef struct ForkingStatement_tag ForkingStatement;
 
 typedef enum {
     CS_FALSE = 0,
@@ -166,9 +170,25 @@ struct Expression_tag {
 typedef enum {
     EXPRESSION_STATEMENT = 1,
     DECLARATION_STATEMENT,
+	IF_STATEMENT,
     STATEMENT_TYPE_COUNT_PLUS_ONE
 } StatementType;
 
+struct ForkingStatement_tag {
+	IfStatement *if_statement;
+	ElsifStatement *elsif_statement;
+	StatementList *else_statement;
+};
+
+struct IfStatement_tag {
+	Expression* condition;
+	StatementList *statement_list;	
+};
+
+struct ElsifStatement_tag {
+	IfStatement *elsif_statement;
+	struct ElsifStatement_tag *next_elsif_stmt;
+};
 
 struct Statement_tag {
     StatementType type;
@@ -176,8 +196,8 @@ struct Statement_tag {
     union {
         Expression   *expression_s;
         Declaration  *declaration_s;
+		ForkingStatement *if_statement_s;
     }u;
-
 };
 
 /* Temporary used */
@@ -189,7 +209,7 @@ typedef struct ExpressionList_tag {
 typedef struct StatementList_tag {
     Statement *stmt;
     struct StatementList_tag *next;
-} StatementList;
+};
 
 typedef struct DeclarationList_tag {
     Declaration* decl;
@@ -265,6 +285,9 @@ char* cs_create_identifier(const char* str);
 Statement* cs_create_expression_statement(Expression* expr);
 Statement* cs_create_declaration_statement(CS_BasicType type, char* name, Expression* initializer);
 StatementList* cs_create_statement_list(Statement* stmt);
+ForkingStatement* cs_create_forking_statement(IfStatement *if_statement, ElsifStatement *elsif_statement, StatementList *else_statement);
+IfStatement* cs_create_if_statement(Expression *condition, Statement *statement_list);
+ElsifStatement* cs_chain_elsif_statement(ElsifStatement *dest, Expression *condition, StatementList *statement_list);
 
 
 DeclarationList* cs_create_declaration_list(Declaration* decl);
@@ -286,6 +309,7 @@ void cs_set_current_compiler(CS_Compiler *compiler);
 CS_Compiler* cs_get_current_compiler();
 DeclarationList* cs_chain_declaration(DeclarationList* decl_list, Declaration* decl);
 StatementList* cs_chain_statement_list(StatementList* stmt_list, Statement* stmt);
+StatementList* cs_chaincat_statement_list(StatementList* dest, StatementList* src);
 FunctionDeclarationList* cs_chain_function_declaration_list(FunctionDeclarationList* func_list, FunctionDeclaration* func);
 Declaration* cs_search_decl_in_block();
 Declaration* cs_search_decl_global(const char* name);

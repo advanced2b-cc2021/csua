@@ -34,6 +34,20 @@ StatementList* cs_chain_statement_list(StatementList* stmt_list, Statement* stmt
     return stmt_list;
 }
 
+/* concat statement list */
+StatementList* cs_chaincat_statement_list(StatementList* dest, StatementList* src) {
+    StatementList* p;
+    
+	if (!dest) {
+		return src;
+	}
+	p = dest;
+	while (p->next)
+		p = p->next;
+	p->next = src;
+    return dest;
+}
+
 
 FunctionDeclarationList* cs_chain_function_declaration_list(FunctionDeclarationList* func_list, FunctionDeclaration* func) {
     FunctionDeclarationList* p = NULL;
