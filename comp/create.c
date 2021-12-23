@@ -210,17 +210,12 @@ static ElsifStatement *cs_create_elsif_statement(IfStatement *elsif_statement) {
 
 ElsifStatement *cs_chain_elsif_statement(ElsifStatement *dest, Expression *condition, StatementList *statement_list) {
 	IfStatement *elsif_statement = cs_create_if_statement(condition, statement_list);
-	ElsifStatement *p;
 	ElsifStatement *to_append = cs_create_elsif_statement(elsif_statement);
 	if (!dest) {
 		return to_append;
 	}
-	p = dest;
-	while (p->next_elsif_stmt) {
-		p = p->next_elsif_stmt;
-	}
-	p->next_elsif_stmt = to_append;
-	return dest;
+	to_append->next_elsif_stmt = dest;
+	return to_append;
 }
 
 StatementList* cs_create_statement_list(Statement* stmt) {
