@@ -39,7 +39,7 @@ static CS_Executable* code_generate(CS_Compiler* compiler) {
     copy_declaration(compiler, exec); // copy variables
     CodegenVisitor* cgen_visitor = create_codegen_visitor(compiler, exec);
     
-    StatementList* stmt_list = compiler->stmt_list;
+    StatementList* stmt_list = compiler->root_stmt_list;
     while(stmt_list) {
         traverse_stmt(stmt_list->stmt, (Visitor*)cgen_visitor);
         stmt_list = stmt_list->next;
@@ -370,7 +370,7 @@ int main(int argc, char* argv[]) {
         
         fprintf(stderr, "\n--- Tree View ---\n");
         Visitor* visitor = create_treeview_visitor();    
-        StatementList* stmt_list = compiler->stmt_list;
+        StatementList* stmt_list = compiler->root_stmt_list;
         while(stmt_list) {
             traverse_stmt(stmt_list->stmt, visitor);
             stmt_list = stmt_list->next;

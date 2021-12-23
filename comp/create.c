@@ -54,6 +54,7 @@ void delete_storage() {
 #endif            
 }
 
+//使われない
 ExpressionList* cs_chain_expression_list(ExpressionList* list, Expression* expr) {
     ExpressionList* p = list;
     ExpressionList* nlist= (ExpressionList*)MEM_storage_malloc(storage, sizeof(ExpressionList));    

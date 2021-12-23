@@ -74,17 +74,20 @@
                  
 %type <assignment_operator> assignment_operator
 %type <type_specifier> type_specifier
-%type <statement> statement declaration_statement
+%type <statement> statement declaration_statement IfStatement
 %type <function_declaration> function_definition
 %type <parameter_list> parameter_list
 %type <argument_list> argument_list
 
 %%
 translation_unit
-        : definition_or_statement  
-        | translation_unit definition_or_statement 
-	;
-definition_or_statement
+        : definition_or_statement_list
+        | translation_unit definition_or_statement_list
+        ;
+
+
+
+definition_or_statement_list
         : function_definition
         {
            CS_Compiler* compiler = cs_get_current_compiler();
@@ -92,14 +95,55 @@ definition_or_statement
                compiler->func_list = cs_chain_function_declaration_list(compiler->func_list, $1);
            }
         }
-        | statement  
+        | statement_list {
+           CS_Compiler* compiler = cs_get_current_compiler();
+           if (compiler) {
+               compiler->root_stmt_list = $1;
+           }
+        }
+        ;
+
+statement_list
+        : statement_list broad_statement
+        | broad_statement
+        ;
+
+broad_statement
+        : statement
         {
            CS_Compiler* compiler = cs_get_current_compiler();
            if (compiler) {
                compiler->stmt_list = cs_chain_statement_list(compiler->stmt_list, $1);
            }
         }
+        | if_statement
         ;
+
+if_statement
+        : IF LP expression RP LC statement_list RC elsif_list ELSE LC statement_list RC
+        {
+                Todo
+        }
+        | IF LP expression RP LC statement_list RC elsif_list
+        {
+                Todo
+        }
+        | IF LP expression RP LC statement_list RC            ELSE LC statement_list RC
+        {
+                Todo
+        }
+        | IF LP expression RP LC statement_list RC
+        {
+                Todo
+        }
+        ;
+
+elsif_list
+        : elsif_list ELSIF LP expression RP LC statement_list RC
+        |            ELSIF LP expression RP LC statement_list RC
+        ;
+
+
 
 function_definition
         : type_specifier IDENTIFIER LP RP SEMICOLON { $$ = cs_create_function_declaration($1, $2, NULL);}    

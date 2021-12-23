@@ -19,6 +19,11 @@ typedef struct CS_Compiler_tag CS_Compiler;
 
 typedef struct TypeSpecifier_tag TypeSpecifier;
 typedef struct Statement_tag Statement;
+typedef struct IfStatement_tag IfStatement;
+typedef struct ElseIfStatement_tag ElseIfStatement;
+
+typedef uint32_t PC_LABEL;
+
 
 typedef enum {
     CS_FALSE = 0,
@@ -166,6 +171,7 @@ struct Expression_tag {
 typedef enum {
     EXPRESSION_STATEMENT = 1,
     DECLARATION_STATEMENT,
+    IF_STATEMENT,
     STATEMENT_TYPE_COUNT_PLUS_ONE
 } StatementType;
 
@@ -176,9 +182,49 @@ struct Statement_tag {
     union {
         Expression   *expression_s;
         Declaration  *declaration_s;
+        IfStatement  *ifstatement_s
     }u;
 
 };
+
+/* IfStatement */
+
+typedef enum {
+    IF_ONLY = 1,
+    IF_ELSE,
+    IF_ELSEIF,
+    IF_ELSEIF_ELSE,
+    IFSTATEMENT_TYPE_COUNT_PLUS_ONE
+} IfStatementType;
+
+struct IfStatement_tag {
+    IfStatementType;
+    //int line_number //エラー文表示用？
+    StatementList *if_stmt_list;
+    ElseIfStatementList *elseif_stmt_list;
+    StatementList *else_stmt_list;
+    Expression *if_expr;
+    Expression *else_expr;
+    /*
+    union {
+        IfOnlyStatement       *ifOnlyStatement;
+        IfElseStatement       *ifElseStatement;
+        IfElseifStatement     *ifElseifStatement;
+        IfElseifElseStatement *ifElseifElseSatement;
+    }u;
+    */
+   //LocationToReplaceList
+};
+
+struct ElseIfStatement_tag {
+    Expression *expression_s;
+    StatementList stmt_list;
+};
+
+typedef struct ElseIfStatementList_tag {
+    ElseIfStatement *elseIfStatement;
+    struct ElseIfStatement_tag *next;
+} ElseIfStatementList;
 
 /* Temporary used */
 typedef struct ExpressionList_tag {
@@ -204,7 +250,7 @@ typedef struct FunctionDeclarationList_tag {
 struct CS_Compiler_tag {
     MEM_Storage      storage;
     ExpressionList          *expr_list; // temporary
-    StatementList           *stmt_list;
+    StatementList           *root_stmt_list;
     DeclarationList         *decl_list;
     FunctionDeclarationList *func_list;
     int current_line;
@@ -240,8 +286,15 @@ typedef struct {
     uint8_t         *code;
 } CS_Executable;
 
+typedef struct LocationToReplaceList_tag {
+    uint8_t *location_to_replace;
+    struct LocationToReplaceList_tag *next;
+} LocationToReplaceList;
 
-
+typedef struct LocationToReplaceListList_tag {
+    LocationToReplaceList location_to_replace_list;
+    struct LocationToReplaceListList_tag *next;
+} LocationToReplaceListList;
 
 
 /* create.c */
