@@ -194,12 +194,14 @@ ForkingStatement* cs_create_forking_statement(IfStatement *if_statement, ElsifSt
 	stmt->if_statement = if_statement;
 	stmt->elsif_statement = elsif_statement;
 	stmt->else_statement = else_statement;
+	return stmt;
 }
 
 IfStatement *cs_create_if_statement(Expression *condition, Statement *statement_list) {
 	IfStatement *stmt = (IfStatement *)cs_malloc(sizeof(IfStatement));
 	stmt->condition = condition;
 	stmt->statement_list = statement_list;
+	return stmt;
 }
 
 static ElsifStatement *cs_create_elsif_statement(IfStatement *elsif_statement) {
