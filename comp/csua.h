@@ -21,6 +21,8 @@ typedef struct TypeSpecifier_tag TypeSpecifier;
 typedef struct Statement_tag Statement;
 typedef struct IfStatement_tag IfStatement;
 typedef struct ElseIfStatement_tag ElseIfStatement;
+typedef struct ElseIfStatementList_tag ElseIfStatementList;
+typedef struct StatementList_tag StatementList;
 
 typedef uint32_t PC_LABEL;
 
@@ -172,7 +174,7 @@ typedef enum {
     EXPRESSION_STATEMENT = 1,
     DECLARATION_STATEMENT,
     IF_STATEMENT,
-    STATEMENT_TYPE_COUNT_PLUS_ONE
+    STATEMENT_TYPE_COUNT_PLUS_ONE,
 } StatementType;
 
 
@@ -182,7 +184,7 @@ struct Statement_tag {
     union {
         Expression   *expression_s;
         Declaration  *declaration_s;
-        IfStatement  *ifstatement_s
+        IfStatement  *ifstatement_s;
     }u;
 
 };
@@ -194,11 +196,11 @@ typedef enum {
     IF_ELSE,
     IF_ELSEIF,
     IF_ELSEIF_ELSE,
-    IFSTATEMENT_TYPE_COUNT_PLUS_ONE
+    IFSTATEMENT_TYPE_COUNT_PLUS_ONE,
 } IfStatementType;
 
 struct IfStatement_tag {
-    IfStatementType;
+    IfStatementType type;
     //int line_number //エラー文表示用？
     StatementList *if_stmt_list;
     ElseIfStatementList *elseif_stmt_list;
@@ -218,13 +220,13 @@ struct IfStatement_tag {
 
 struct ElseIfStatement_tag {
     Expression *expression_s;
-    StatementList stmt_list;
+    StatementList *stmt_list;
 };
 
-typedef struct ElseIfStatementList_tag {
+struct ElseIfStatementList_tag {
     ElseIfStatement *elseIfStatement;
     struct ElseIfStatement_tag *next;
-} ElseIfStatementList;
+};
 
 /* Temporary used */
 typedef struct ExpressionList_tag {
@@ -232,10 +234,10 @@ typedef struct ExpressionList_tag {
     struct ExpressionList_tag *next;
 } ExpressionList;
 
-typedef struct StatementList_tag {
+struct StatementList_tag {
     Statement *stmt;
     struct StatementList_tag *next;
-} StatementList;
+};
 
 typedef struct DeclarationList_tag {
     Declaration* decl;
@@ -348,5 +350,8 @@ ArgumentList* cs_chain_argument_list(ArgumentList* list, Expression* expr);
 
 /* scanner.c */
 int get_current_line();
+
+/* parsetest.c */
+void print_ExpressionKind(int);
 #endif /* CSUA_H */
 

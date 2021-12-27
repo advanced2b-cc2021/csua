@@ -1,7 +1,7 @@
 %{
 #include <stdio.h>
 #define YYDEBUG 1
-#include "csua.h"    
+#include "csua.h"
 %}
 %union{
     int                  iv;
@@ -14,6 +14,9 @@
     CS_BasicType         type_specifier;
     ParameterList       *parameter_list;
     ArgumentList        *argument_list;
+    StatementList       *statement_list;
+    IfStatement         *if_statement;
+    ElseIfStatement     *elsif_list;
 }
 
 %token LP
@@ -74,7 +77,10 @@
                  
 %type <assignment_operator> assignment_operator
 %type <type_specifier> type_specifier
-%type <statement> statement declaration_statement IfStatement
+%type <statement> statement declaration_statement
+%type <if_statement> if_statement
+%type <elsif_list> elsif_list
+%type <statement_list> statement_list
 %type <function_declaration> function_definition
 %type <parameter_list> parameter_list
 %type <argument_list> argument_list
@@ -82,7 +88,21 @@
 %%
 translation_unit
         : definition_or_statement_list
+        {
+                CS_Compiler* compiler = cs_get_current_compiler();
+                if (compiler) {
+                        fprintf(stderr, "line %d :", compiler->current_line);
+                }
+                fprintf(stderr, "translation_unit 1\n");
+        }
         | translation_unit definition_or_statement_list
+        {
+                CS_Compiler* compiler = cs_get_current_compiler();
+                if (compiler) {
+                        fprintf(stderr, "line %d :", compiler->current_line);
+                }
+                fprintf(stderr, "translation_unit 2\n");
+        }
         ;
 
 
@@ -93,19 +113,37 @@ definition_or_statement_list
            CS_Compiler* compiler = cs_get_current_compiler();
            if (compiler) {
                compiler->func_list = cs_chain_function_declaration_list(compiler->func_list, $1);
+                fprintf(stderr, "line %d :", compiler->current_line);
            }
+           fprintf(stderr, "definition_or_statement_list 1\n");
         }
         | statement_list {
            CS_Compiler* compiler = cs_get_current_compiler();
            if (compiler) {
                compiler->root_stmt_list = $1;
+               fprintf(stderr, "line %d :", compiler->current_line);
            }
+           fprintf(stderr, "definition_or_statement_list 2\n");
         }
         ;
 
 statement_list
         : statement_list broad_statement
+        {
+                CS_Compiler* compiler = cs_get_current_compiler();
+                if (compiler) {
+                        fprintf(stderr, "line %d :", compiler->current_line);
+                }
+                fprintf(stderr, "statement_list 1\n");
+        }
         | broad_statement
+        {
+                CS_Compiler* compiler = cs_get_current_compiler();
+                if (compiler) {
+                        fprintf(stderr, "line %d :", compiler->current_line);
+                }
+                fprintf(stderr, "statement_list 2\n");
+        }
         ;
 
 broad_statement
@@ -113,41 +151,95 @@ broad_statement
         {
            CS_Compiler* compiler = cs_get_current_compiler();
            if (compiler) {
-               compiler->stmt_list = cs_chain_statement_list(compiler->stmt_list, $1);
+               compiler->root_stmt_list = cs_chain_statement_list(compiler->root_stmt_list, $1);
+               fprintf(stderr, "line %d :", compiler->current_line);
            }
+           fprintf(stderr, "broad_statement 1\n");
         }
         | if_statement
+        {
+                CS_Compiler* compiler = cs_get_current_compiler();
+                if (compiler) {
+                        fprintf(stderr, "line %d :", compiler->current_line);
+                }
+                fprintf(stderr, "broad_statement 2\n");
+        }
         ;
 
 if_statement
         : IF LP expression RP LC statement_list RC elsif_list ELSE LC statement_list RC
         {
-                Todo
+                //Todo
+                CS_Compiler* compiler = cs_get_current_compiler();
+                if (compiler) {
+                        fprintf(stderr, "line %d :", compiler->current_line);
+                }
+                fprintf(stderr, "if_statement 1\n");
         }
         | IF LP expression RP LC statement_list RC elsif_list
         {
-                Todo
+                //Todo
+                CS_Compiler* compiler = cs_get_current_compiler();
+                if (compiler) {
+                        fprintf(stderr, "line %d :", compiler->current_line);
+                }
+
+                fprintf(stderr, "if_statement 2\n");
         }
         | IF LP expression RP LC statement_list RC            ELSE LC statement_list RC
         {
-                Todo
+                //Todo
+                CS_Compiler* compiler = cs_get_current_compiler();
+                if (compiler) {
+                        fprintf(stderr, "line %d :", compiler->current_line);
+                }
+
+                fprintf(stderr, "if_statement 3\n");
         }
         | IF LP expression RP LC statement_list RC
         {
-                Todo
+                //Todo
+                CS_Compiler* compiler = cs_get_current_compiler();
+                if (compiler) {
+                        fprintf(stderr, "line %d :", compiler->current_line);
+                }
+
+                fprintf(stderr, "if_statement 4\n");
         }
         ;
 
 elsif_list
         : elsif_list ELSIF LP expression RP LC statement_list RC
+        {
+                CS_Compiler* compiler = cs_get_current_compiler();
+                if (compiler) {
+                        fprintf(stderr, "line %d :", compiler->current_line);
+                }
+                fprintf(stderr, "elsif_list 1\n");
+        }
         |            ELSIF LP expression RP LC statement_list RC
+        {
+                CS_Compiler* compiler = cs_get_current_compiler();
+                if (compiler) {
+                        fprintf(stderr, "line %d :", compiler->current_line);
+                }
+                fprintf(stderr, "elsif_list 2\n");
+        }
         ;
 
 
 
 function_definition
-        : type_specifier IDENTIFIER LP RP SEMICOLON { $$ = cs_create_function_declaration($1, $2, NULL);}    
-        | type_specifier IDENTIFIER LP parameter_list RP SEMICOLON { $$ = cs_create_function_declaration($1, $2, $4);} 
+        : type_specifier IDENTIFIER LP RP SEMICOLON
+        {
+                $$ = cs_create_function_declaration($1, $2, NULL);
+                fprintf(stderr, "function_definition 1\n");
+        }
+        | type_specifier IDENTIFIER LP parameter_list RP SEMICOLON
+        {
+                $$ = cs_create_function_declaration($1, $2, $4);
+                fprintf(stderr, "function_definition 2\n");
+        }
         ;
         
 parameter_list
@@ -168,6 +260,13 @@ statement
                compiler->expr_list = cs_chain_expression_list(compiler->expr_list, $1);
            }
      */
+                CS_Compiler* compiler = cs_get_current_compiler();
+                if (compiler) {
+                        fprintf(stderr, "line %d :", compiler->current_line);
+                }
+
+            fprintf(stderr, "statement\n");
+
             $$ = cs_create_expression_statement($1);
         }
         | declaration_statement { /*printf("declaration_statement\n"); */}
@@ -195,7 +294,7 @@ expression
 	: assignment_expression 
          { 
              Expression* expr = $1;
-//             printf("type = %d\n", expr->kind);
+             print_ExpressionKind(expr->kind);
              $$ = $1;
          }
 	;
