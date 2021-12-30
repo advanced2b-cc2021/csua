@@ -87,7 +87,7 @@
 
 %%
 translation_unit
-        : definition_or_statement_list
+        : translation_unit definition_or_statement_list
         {
                 CS_Compiler* compiler = cs_get_current_compiler();
                 if (compiler) {
@@ -95,7 +95,7 @@ translation_unit
                 }
                 fprintf(stderr, "translation_unit 1\n");
         }
-        | translation_unit definition_or_statement_list
+        | definition_or_statement_list
         {
                 CS_Compiler* compiler = cs_get_current_compiler();
                 if (compiler) {
@@ -127,6 +127,14 @@ definition_or_statement_list
         }
         ;
 
+statement_block
+        : LC statement_list RC
+        {
+                statement_list_group--;
+                //fprintf(stderr, "------------statement_list end------------n");
+        }
+        ;
+
 statement_list
         : statement_list broad_statement
         {
@@ -135,6 +143,7 @@ statement_list
                         fprintf(stderr, "line %d :", compiler->current_line);
                 }
                 fprintf(stderr, "statement_list 1\n");
+                fprintf(stderr, "%d\n", statement_list_group);
         }
         | broad_statement
         {
@@ -142,7 +151,9 @@ statement_list
                 if (compiler) {
                         fprintf(stderr, "line %d :", compiler->current_line);
                 }
+                statement_list_group++;
                 fprintf(stderr, "statement_list 2\n");
+                fprintf(stderr, "%d\n", statement_list_group);
         }
         ;
 
@@ -164,19 +175,19 @@ broad_statement
                 }
                 fprintf(stderr, "broad_statement 2\n");
         }
+        | statement_block
         ;
 
 if_statement
-        : IF LP expression RP LC statement_list RC elsif_list ELSE LC statement_list RC
+        : IF LP expression RP statement_block elsif_list ELSE statement_block
         {
-                //Todo
                 CS_Compiler* compiler = cs_get_current_compiler();
                 if (compiler) {
                         fprintf(stderr, "line %d :", compiler->current_line);
                 }
                 fprintf(stderr, "if_statement 1\n");
         }
-        | IF LP expression RP LC statement_list RC elsif_list
+        | IF LP expression RP statement_block elsif_list
         {
                 //Todo
                 CS_Compiler* compiler = cs_get_current_compiler();
@@ -186,7 +197,7 @@ if_statement
 
                 fprintf(stderr, "if_statement 2\n");
         }
-        | IF LP expression RP LC statement_list RC            ELSE LC statement_list RC
+        | IF LP expression RP statement_block            ELSE statement_block
         {
                 //Todo
                 CS_Compiler* compiler = cs_get_current_compiler();
@@ -196,7 +207,7 @@ if_statement
 
                 fprintf(stderr, "if_statement 3\n");
         }
-        | IF LP expression RP LC statement_list RC
+        | IF LP expression RP statement_block
         {
                 //Todo
                 CS_Compiler* compiler = cs_get_current_compiler();
@@ -209,7 +220,7 @@ if_statement
         ;
 
 elsif_list
-        : elsif_list ELSIF LP expression RP LC statement_list RC
+        : elsif_list ELSIF LP expression RP statement_block
         {
                 CS_Compiler* compiler = cs_get_current_compiler();
                 if (compiler) {
@@ -217,7 +228,7 @@ elsif_list
                 }
                 fprintf(stderr, "elsif_list 1\n");
         }
-        |            ELSIF LP expression RP LC statement_list RC
+        |            ELSIF LP expression RP statement_block
         {
                 CS_Compiler* compiler = cs_get_current_compiler();
                 if (compiler) {
