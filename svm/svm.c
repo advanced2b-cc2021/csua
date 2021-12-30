@@ -340,6 +340,11 @@ static uint16_t fetch2(SVM_VirtualMachine* svm) {
     return (v1 << 8) | fetch(svm);
 }
 
+static uint32_t fetch4(SVM_VirtualMachine* svm) {//for fetch 4 byte
+    uint16_t v_fetch2 = fetch2(svm);
+    return (v_fetch2 << 16) | fetch2(svm);
+}
+
 static SVM_Constant* read_static(SVM_VirtualMachine* svm, uint16_t idx) {
     return &svm->constant_pool[idx];
 }
