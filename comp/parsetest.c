@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "csua.h"
-
+int statement_list_group = 0;
 void print_ExpressionKind(int type) {
     switch (type) {
         case BOOLEAN_EXPRESSION: fprintf(stderr, "type = BOOLEAN_EXPRESSION\n"); break;

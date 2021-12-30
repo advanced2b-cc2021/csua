@@ -1,24 +1,24 @@
 print();
 int i;
 i = 0;
-if (i == 0) {
+if (1 < 1) {
   print();
   print();
   print();
-  if (i == 1) {
+  if (1 == 1) {
     print();
     print();
     print();
     print();
     i += 1;
-  } elsif (i == 0) {
+  } elsif (1 > 0) {
     print();
     print();
     print();
     print();
     print();
     i -=1;
-  } elsif (i == 2){
+  } elsif (2 >= 2){
     print();
     print();
     print();
@@ -26,7 +26,7 @@ if (i == 0) {
     print();
     print();
   }
-} elsif (i > 0) {
+} elsif (1 <= 0) {
   print();
   print();
 } else {

@@ -26,6 +26,7 @@ typedef struct StatementList_tag StatementList;
 
 typedef uint32_t PC_LABEL;
 
+extern int statement_list_group;
 
 typedef enum {
     CS_FALSE = 0,
@@ -206,7 +207,6 @@ struct IfStatement_tag {
     ElseIfStatementList *elseif_stmt_list;
     StatementList *else_stmt_list;
     Expression *if_expr;
-    Expression *else_expr;
     /*
     union {
         IfOnlyStatement       *ifOnlyStatement;

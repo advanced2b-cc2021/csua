@@ -728,6 +728,7 @@ static void enter_declstmt(Statement* stmt, Visitor* visitor) {
 
 static void leave_declstmt(Statement* stmt, Visitor* visitor) {
 //    fprintf(stderr, "leave declstmt\n");
+//初期化子が指定されているならそれで初期化する
     if (stmt->u.declaration_s->initializer) {
          Declaration* decl = cs_search_decl_in_block(); // dummy
          if (!decl) {

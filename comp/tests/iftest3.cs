@@ -1,2 +1,4 @@
 print();
-int func();
+print();
+
+int func()
