@@ -8,7 +8,10 @@
     double               dv;
     char                *name;
     Expression          *expression;
+    StatementList       *statement_list;
     Statement           *statement;
+	ForkingStatement	*forking_statement;
+	ElsifStatement		*elsif_statement;
     FunctionDeclaration *function_declaration;
     AssignmentOperator   assignment_operator;
     CS_BasicType         type_specifier;
@@ -74,7 +77,10 @@
                  
 %type <assignment_operator> assignment_operator
 %type <type_specifier> type_specifier
-%type <statement> statement declaration_statement
+%type <statement_list> statement_list
+%type <statement> broad_statement statement declaration_statement
+%type <forking_statement> if_statement
+%type <elsif_statement> elsif_list
 %type <function_declaration> function_definition
 %type <parameter_list> parameter_list
 %type <argument_list> argument_list
@@ -96,37 +102,85 @@ definition_or_statement_list
            }
         }
         | statement_list
+		{
+			CS_Compiler* compiler = cs_get_current_compiler();
+			if (compiler) {
+				compiler->stmt_list = cs_chaincat_statement_list(compiler->stmt_list, $1);
+			}
+		}
         ;
 
 statement_list
         : statement_list broad_statement
+		{
+			$$ = cs_chain_statement_list(NULL, $1);
+		}
         | broad_statement
+		{
+			$$ = cs_chain_statement_list(NULL, $1);
+		}
         ;
 
 broad_statement
         : statement
         {
+			$$ = $1;
+			/*
            CS_Compiler* compiler = cs_get_current_compiler();
            if (compiler) {
                compiler->stmt_list = cs_chain_statement_list(compiler->stmt_list, $1);
            }
+			*/
         }
         | if_statement
+		{
+			Statement *if_stmt = (Statement *)cs_malloc(sizeof(Statement));
+			if_stmt->type = IF_STATEMENT;
+			if_stmt->u.if_statement_s = $1;
+			$$ = if_stmt;
+		}
         ;
 
 if_statement
         : IF LP expression RP LC statement_list RC elsif_list ELSE LC statement_list RC
-        | IF LP expression RP LC statement_list RC elsif_list
-        | IF LP expression RP LC statement_list RC            ELSE LC statement_list RC
+
+		{
+			CS_Compiler *compiler = cs_get_current_compiler();
+			IfStatement *if_statement = cs_create_if_statement($3, $6);
+			ForkingStatement *forking_statement = cs_create_forking_statement(if_statement,  $8, $11);
+			$$ = forking_statement;
+		}
+		| IF LP expression RP LC statement_list RC elsif_list
+		{
+			CS_Compiler *compiler = cs_get_current_compiler();
+			IfStatement *if_statement = cs_create_if_statement($3, $6);
+			ForkingStatement *forking_statement = cs_create_forking_statement(if_statement,  $8, NULL);
+			$$ = forking_statement;
+		}
+        | IF LP expression RP LC statement_list RC ELSE LC statement_list RC
+		{
+			IfStatement *if_statement = cs_create_if_statement($3, $6);
+			ForkingStatement *forking_statement = cs_create_forking_statement(if_statement, NULL, $10);
+			$$ = forking_statement;
+		}
         | IF LP expression RP LC statement_list RC
+		{
+			IfStatement *if_statement = cs_create_if_statement($3, $6);
+			ForkingStatement *forking_statement = cs_create_forking_statement(if_statement, NULL, NULL);
+			$$ = forking_statement;
+		}
         ;
 
 elsif_list
         : elsif_list ELSIF LP expression RP LC statement_list RC
-        |            ELSIF LP expression RP LC statement_list RC
+		{
+			$$ = cs_chain_elsif_statement($1, $4, $7);
+		}
+        | ELSIF LP expression RP LC statement_list RC
+		{
+			$$ = cs_chain_elsif_statement(NULL, $3, $6);
+		}
         ;
-
-
 
 function_definition
         : type_specifier IDENTIFIER LP RP SEMICOLON { $$ = cs_create_function_declaration($1, $2, NULL);}    

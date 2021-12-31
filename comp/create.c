@@ -189,6 +189,36 @@ Statement* cs_create_declaration_statement(CS_BasicType type, char* name, Expres
     return stmt;    
 }
 
+ForkingStatement* cs_create_forking_statement(IfStatement *if_statement, ElsifStatement *elsif_statement, StatementList *else_statement) {
+	ForkingStatement *stmt = (ForkingStatement *)cs_malloc(sizeof(ForkingStatement));
+	stmt->if_statement = if_statement;
+	stmt->elsif_statement = elsif_statement;
+	stmt->else_statement = else_statement;
+	return stmt;
+}
+
+IfStatement *cs_create_if_statement(Expression *condition, Statement *statement_list) {
+	IfStatement *stmt = (IfStatement *)cs_malloc(sizeof(IfStatement));
+	stmt->condition = condition;
+	stmt->statement_list = statement_list;
+	return stmt;
+}
+
+static ElsifStatement *cs_create_elsif_statement(IfStatement *elsif_statement) {
+	ElsifStatement *stmt = (IfStatement *)cs_malloc(sizeof(ElsifStatement));
+	stmt->elsif_statement = elsif_statement;
+	return stmt;
+}
+
+ElsifStatement *cs_chain_elsif_statement(ElsifStatement *dest, Expression *condition, StatementList *statement_list) {
+	IfStatement *elsif_statement = cs_create_if_statement(condition, statement_list);
+	ElsifStatement *to_append = cs_create_elsif_statement(elsif_statement);
+	if (!dest) {
+		return to_append;
+	}
+	to_append->next_elsif_stmt = dest;
+	return to_append;
+}
 
 StatementList* cs_create_statement_list(Statement* stmt) {
     StatementList* stmt_list = (StatementList*)cs_malloc(sizeof(StatementList));
