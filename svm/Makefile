@@ -2,6 +2,7 @@ CC = /usr/bin/gcc
 
 TARGET = svm
 CFLAGS = -c -g -DDEBUG
+LINK	= -lm
 MEMORY = ../memory/memory.o ../memory/storage.o
 
 OBJS = svm.o opinfo.o native.o
@@ -10,7 +11,7 @@ all: $(TARGET)
 
 $(TARGET): $(OBJS) $(MEMORY)
 	make -C ../memory
-	$(CC) -o $@ $^
+	$(CC) -o $@ $^ $(LINK)
 
 .c.o:
 	$(CC) $(CFLAGS) $*.c
