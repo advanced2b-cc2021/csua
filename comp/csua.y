@@ -1,10 +1,7 @@
 %{
 #include <stdio.h>
 #define YYDEBUG 1
-#include "csua.h"  
-
-int yyerror(char const *str);
-int yylex();
+#include "csua.h"    
 %}
 %union{
     int                  iv;
@@ -118,7 +115,6 @@ broad_statement
         ;
 
 if_statement
-
         : IF LP expression RP LC statement_list RC elsif_list ELSE LC statement_list RC
         | IF LP expression RP LC statement_list RC elsif_list
         | IF LP expression RP LC statement_list RC            ELSE LC statement_list RC
@@ -126,8 +122,8 @@ if_statement
         ;
 
 elsif_list
-        : elsif_list ELSIF LP expression RP LC statement_list RC {printf("else if\n");}
-        |            ELSIF LP expression RP LC statement_list RC {printf("else if2\n");}
+        : elsif_list ELSIF LP expression RP LC statement_list RC
+        |            ELSIF LP expression RP LC statement_list RC
         ;
 
 

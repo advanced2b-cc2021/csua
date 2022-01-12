@@ -3,13 +3,6 @@
 #include "csua.h"
 #include "../memory/MEM.h"
 
-/*
-    式の構造体のインスタンスを作るための関数を作成。インスタンスはASTのノードとなる
-    様々な式があるのでそのそれぞれに対して関数を用意する
-
-*/
-
-
 static MEM_Storage storage = NULL;
 static CS_Compiler* compiler = NULL;
 
@@ -64,14 +57,14 @@ void delete_storage() {
 ExpressionList* cs_chain_expression_list(ExpressionList* list, Expression* expr) {
     ExpressionList* p = list;
     ExpressionList* nlist= (ExpressionList*)MEM_storage_malloc(storage, sizeof(ExpressionList));    
-    nlist->next = NULL;//最後尾のためnextはnull
+    nlist->next = NULL;
     nlist->expression = expr;    
-    if (p != NULL) {//引数のリストがすでにリストになっているならば実行
-        while (p->next) p = p->next;//引数のリストの最後まで移動
-        p->next = nlist;//最後尾に引数のexpressionを代入
+    if (p != NULL) {
+        while (p->next) p = p->next;
+        p->next = nlist;
         return list;
     } 
-    return nlist;//新しいリストを作って戻す
+    return nlist;
     
 }
 
