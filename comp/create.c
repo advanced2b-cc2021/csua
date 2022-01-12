@@ -196,6 +196,11 @@ Statement* cs_create_declaration_statement(CS_BasicType type, char* name, Expres
     return stmt;    
 }
 
+IF_Statement* cs_create_IF_statement(bool ex_value){
+	IF_Statement* IFstmt = (IF_Statement*)cs_malloc(sizeof(IF_Statement*));
+	IFstmt->ex_value = ex_value;
+	return IFstmt;
+}
 
 StatementList* cs_create_statement_list(Statement* stmt) {
     StatementList* stmt_list = (StatementList*)cs_malloc(sizeof(StatementList));
