@@ -13,10 +13,3 @@ if(TRUE_T){
 	print();
 }
 
-if(FALSE){
-	print();
-}elsif(false){
-	print();
-}else{
-	print;
-}
