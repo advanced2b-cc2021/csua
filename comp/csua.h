@@ -141,6 +141,14 @@ typedef struct {
     Expression         *right;        
 } AssignmentExpression;
 
+/*様々な式があるためそれぞれ構造体を定義する
+ 論理否定、マイナスは式の値を反転させるだけなので構造体を用意せず
+ 直接expression_tagに定義
+
+ */
+
+
+
 struct Expression_tag {
     ExpressionKind kind;
     TypeSpecifier* type; 
