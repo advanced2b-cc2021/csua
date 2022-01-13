@@ -18,7 +18,12 @@ int main(void) {
     for (i = 0; i < 10; ++i) {
         ptr[i] = 0xaa;
     }
+    printf("write aa\n");
     MEM_dump_memory();
+    ptr = (char*)MEM_realloc(ptr, 20);
+    printf("realloc\n");
+    MEM_dump_memory();
+
     MEM_free(ptr);
 
 //    ptr2 = (char*)MEM_malloc(20);

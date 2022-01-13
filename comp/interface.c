@@ -32,11 +32,15 @@ static CS_Boolean do_mean_check(CS_Compiler* compiler) {
     MeanVisitor* mean_visitor = create_mean_visitor();    
     
     StatementList* stmt_list = compiler->root_stmt_list;
+    puts("traverse statrt");
+    traverse_stmt_list(stmt_list, (Visitor*)mean_visitor);
+    /*
     while(stmt_list) {
         traverse_stmt(stmt_list->stmt, (Visitor*)mean_visitor);
         stmt_list = stmt_list->next;
     }
-    
+    */
+   puts("traverse end");
     DeclarationList* dp = NULL;
     dp = compiler->decl_list;
     for (int i = 0; dp; dp = dp->next, ++i) {

@@ -1,24 +1,21 @@
-print();
+int print();
 int i;
-i = 0;
-if (1 < 1) {
+if (1 < 2) {
   print();
-  print();
-  print();
-  if (1 == 1) {
+  if (4 == 3) {
     print();
     print();
     print();
     print();
     i += 1;
-  } elsif (1 > 0) {
+  } elsif (5 > 6) {
     print();
     print();
     print();
     print();
     print();
     i -=1;
-  } elsif (2 >= 2){
+  } elsif (7 >= 8){
     print();
     print();
     print();
@@ -26,10 +23,11 @@ if (1 < 1) {
     print();
     print();
   }
-} elsif (1 <= 0) {
+} elsif (9 <= 10) {
   print();
   print();
 } else {
+  print();
   print();
 }
 double j;

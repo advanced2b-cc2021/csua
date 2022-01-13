@@ -152,6 +152,47 @@ static Statement* cs_create_statement(StatementType type) {
     return stmt;    
 }
 
+Statement* cs_create_statement_block(StatementList* statement_list) {
+    Statement* stmt = cs_create_statement(STATEMENT_BLOCK);
+    stmt->u.statement_block = statement_list;
+    return stmt;
+}
+
+
+Statement* cs_create_if_statement(Expression* if_expr, Statement* if_block_stmt, ElseIfStatementList* elsif_list, Statement* else_block_stmt) {
+    IfStatement* if_stmt = (IfStatement*)cs_malloc(sizeof(IfStatement));
+
+    if (elsif_list == NULL && else_block_stmt == NULL) {
+        if_stmt->type = IF_ONLY;
+    } else if (elsif_list == NULL) {
+        if_stmt->type = IF_ELSE;
+    } else if (else_block_stmt == NULL) {
+        if_stmt->type = IF_ELSEIF;
+    } else {
+        if_stmt->type = IF_ELSEIF_ELSE;
+    }
+
+    if_stmt->if_expr = if_expr;
+    if_stmt->if_block_stmt = if_block_stmt;
+    if_stmt->elseif_stmt_list = elsif_list;
+    if_stmt->else_block_stmt = else_block_stmt;
+    
+    Statement* stmt = cs_create_statement(IF_STATEMENT);
+    stmt->u.ifstatement_s = if_stmt;
+    return stmt;
+}
+
+ElseIfStatementList* cs_create_elsif_list(Expression *elsif_expr, Statement *elsif_block_stmt) {
+    ElseIfStatement* elsif_stmt = (ElseIfStatement*)cs_malloc(sizeof(ElseIfStatement));
+    elsif_stmt->expression_s = elsif_expr;
+    elsif_stmt->stmt = elsif_block_stmt;
+    ElseIfStatementList* elsif_list = (ElseIfStatementList*)cs_malloc(sizeof(ElseIfStatementList));
+    elsif_list->elseIfStatement = elsif_stmt;
+    elsif_list->next = NULL;
+    return elsif_list;
+}
+
+
 Statement* cs_create_expression_statement(Expression* expr) {
     Statement* stmt = cs_create_statement(EXPRESSION_STATEMENT);
     stmt->u.expression_s = expr;
