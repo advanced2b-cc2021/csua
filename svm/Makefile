@@ -1,3 +1,4 @@
+
 CC = /usr/bin/gcc
 
 TARGET = svm
@@ -18,4 +19,5 @@ $(TARGET): $(OBJS) $(MEMORY)
 
 clean:
 	rm -rf $(TARGET) *.o *~ disasm svm
+
 

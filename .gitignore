@@ -1,0 +1,14 @@
+*.o
+y.tab.c
+y.tab.h
+y.output
+*.csb
+keyword.c
+memtest
+prst
+memt
+treet
+meant
+cgent
+disasm
+svm
