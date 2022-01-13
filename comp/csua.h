@@ -19,6 +19,7 @@ typedef struct CS_Compiler_tag CS_Compiler;
 
 typedef struct TypeSpecifier_tag TypeSpecifier;
 typedef struct Statement_tag Statement;
+typedef struct IF_Statement_tag IF_Statement;
 
 typedef enum {
     CS_FALSE = 0,
@@ -186,6 +187,10 @@ struct Statement_tag {
         Declaration  *declaration_s;
     }u;
 
+};
+
+struct IF_Statement_tag {
+	bool expression_value;
 };
 
 /* Temporary used */
