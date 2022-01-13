@@ -724,10 +724,31 @@ static void svm_run(SVM_VirtualMachine* svm) {
                 }
                 break;
             }
+	    case SVM_JUMP:{
+                svm->pc = pop_i(svm);
+                break;
+            }
+            case SVM_CJMP:{
+                uint8_t result = pop_i(svm);
+                uint32_t jmp = pop_i(svm);
+                if(!result){
+                  svm->pc = jmp;
+                }
+                break;
+            }
             case SVM_POP: {
                 pop_i(svm);
                 break;
             }
+	    case SVM_PUSH_LABEL: {
+                uint32_t pc_idx = fetch4(svm);
+                push_i(svm, pc_idx);
+                break;
+	    }
+	    case SVM_POP_LABEL: {
+                uint32_t lb_idx = pop_i(svm);
+                break;
+ 	    }
             default: {
                 fprintf(stderr, "unknown opcode: %02x in svm_run\n", op);
                 show_status(svm);                
