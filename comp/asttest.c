@@ -17,17 +17,29 @@ int main(int argc, char* argv[]) {
     
     
     CS_Compiler* compiler = CS_create_compiler();
-    CS_compile(compiler, fin);
     
+    //CS_compile(compiler, fin);
+    
+    //
+    extern FILE *yyin;
+    extern int yyparse(void);
+    yyin = fin;
+    if (yyin == NULL) {
+        fprintf(stderr, "cannot open file\n");
+        exit(1);
+    }
+    if (yyparse()) {
+        fprintf(stderr, "Parse Error");
+        exit(1);
+    }   
+    //
+
     Visitor* visitor = create_treeview_visitor();
     
-    StatementList* stmt_list = compiler->stmt_list;
+    StatementList* stmt_list = compiler->root_stmt_list;
     printf("--------------\n");
-    stmt_list = compiler->stmt_list;
-    while(stmt_list) {
-        traverse_stmt(stmt_list->stmt, visitor);
-        stmt_list = stmt_list->next;
-    }
+    stmt_list = compiler->root_stmt_list;
+    traverse_stmt_list(stmt_list, visitor);
     printf("--- FunctionInfo ---\n");
     FunctionDeclarationList* func_list = compiler->func_list;
     for (int i = 0; func_list; func_list = func_list->next, ++i) {

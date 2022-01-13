@@ -1,5 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include "csua.h"
+int statement_list_group = 0;
 
 int main(int argc, char* argv[]) {
 
@@ -17,6 +19,8 @@ int main(int argc, char* argv[]) {
         fprintf(stderr, "cannot open file\n");
         exit(1);
     }
+
+    CS_create_compiler();
     
     if (yyparse()) {
         fprintf(stderr, "Parse Error\n");

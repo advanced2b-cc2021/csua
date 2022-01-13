@@ -37,13 +37,19 @@ static CS_Executable* code_generate(CS_Compiler* compiler) {
     
     
     copy_declaration(compiler, exec); // copy variables
+    puts("start create_codegen_visitor");
     CodegenVisitor* cgen_visitor = create_codegen_visitor(compiler, exec);
     
-    StatementList* stmt_list = compiler->stmt_list;
+    StatementList* stmt_list = compiler->root_stmt_list;
+    puts("start cgen traverse");
+    traverse_stmt_list(stmt_list, (Visitor*)cgen_visitor);
+    puts("end cgen traverse");
+    /*
     while(stmt_list) {
         traverse_stmt(stmt_list->stmt, (Visitor*)cgen_visitor);
         stmt_list = stmt_list->next;
     }
+    */
     
     exec->code_size = cgen_visitor->pos;
     exec->code = (uint8_t*)MEM_malloc(exec->code_size);
@@ -52,6 +58,7 @@ static CS_Executable* code_generate(CS_Compiler* compiler) {
     if (cgen_visitor->code) {
         MEM_free(cgen_visitor->code);
     }
+    MEM_free(cgen_visitor->label_replacement_point_stack);
     delete_visitor((Visitor*)cgen_visitor);
     
     return exec;        
@@ -101,6 +108,14 @@ static void add_uint16(DInfo *info, const uint16_t iv) {
     add_string(info, buf);
 }
 
+static void add_uint32(DInfo *info, const uint32_t label) {
+    char buf[10];
+    buf[0] = 0x20; //半角スペース
+    sprintf(&buf[1], "%08x", label);
+    buf[9] = 0;
+    add_string(info, buf);
+}
+
 
 static void write_char(char c, FILE* fp) {
     fwrite(&c, 1, 1, fp);
@@ -136,6 +151,10 @@ static int count_stack_size(uint8_t* code, size_t len) {
             switch(oinfo->parameter[j]) {
                 case 'i': {
                     i += 2;
+                    break;
+                }
+                case '4': {
+                    i += 4;
                     break;
                 }
                 default: {
@@ -211,11 +230,12 @@ static void serialize(CS_Executable* exec){
     }
     
     
-    
     write_int(exec->code_size, fp);
+    //printf("code size = %d, ", exec->code_size);
     write_bytes(exec->code, exec->code_size, fp);
+    //puts("finish writeing code");
     int stack_size = count_stack_size(exec->code, exec->code_size);
-//    printf("s_size = %d\n", stack_size);
+    //printf("s_size = %d\n", stack_size);
     write_int(stack_size, fp);
     
     fclose(fp);
@@ -310,7 +330,11 @@ static void exec_disasm(CS_Executable* exec) {
             case SVM_MINUS_DOUBLE:
             case SVM_INCREMENT:
             case SVM_DECREMENT:
-            case SVM_INVOKE: {
+            case SVM_INVOKE:
+            case SVM_JUMP:
+            case SVM_CJMP:
+            case SVM_PUSH_LABEL:
+            case SVM_POP_LABEL: {
                 add_string(&dinfo, oinfo->opname);
                 break;
             }
@@ -325,6 +349,14 @@ static void exec_disasm(CS_Executable* exec) {
                     uint8_t uv = code[++i];
                     uint16_t op = (uint16_t)( uv << 8 | code[++i]);
                     add_uint16(&dinfo, op);
+                    break;
+                }
+                case '4': {
+                    uint32_t label = code[++i];
+                    label = (uint32_t)(label << 8 | code[++i]);
+                    label = (uint32_t)(label << 8 | code[++i]);
+                    label = (uint32_t)(label << 8 | code[++i]);
+                    add_uint32(&dinfo, label);
                     break;
                 }
                 default: {
@@ -355,26 +387,35 @@ int main(int argc, char* argv[]) {
         printf("Cannot fine file %s\n", argv[1]);
         return 1;
     }
+    puts("CS_create_compiler");
     CS_Compiler* compiler = CS_create_compiler();
+    puts("CS_compile");
     CS_Boolean compile_result = CS_compile(compiler, fin);
     
     
     
-    
+    printf("compile_result = %d\n", compile_result);
     if (compile_result) {
         // Code Generate
+        puts("start code_generate");
         CS_Executable* exec = code_generate(compiler);
+        puts("start exec_disasm");
         exec_disasm(exec);
+        puts("start serialize");
         serialize(exec);
+        puts("start delete_executable");
         delete_executable(exec);
         
         fprintf(stderr, "\n--- Tree View ---\n");
         Visitor* visitor = create_treeview_visitor();    
-        StatementList* stmt_list = compiler->stmt_list;
+        StatementList* stmt_list = compiler->root_stmt_list;
+        traverse_stmt_list(stmt_list, visitor);
+        /*
         while(stmt_list) {
             traverse_stmt(stmt_list->stmt, visitor);
             stmt_list = stmt_list->next;
         }
+        */
         delete_visitor(visitor);
     }    
     

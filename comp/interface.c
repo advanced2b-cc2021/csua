@@ -13,7 +13,7 @@ CS_Compiler* CS_create_compiler() {
     compiler = (CS_Compiler*)MEM_storage_malloc(storage, sizeof(CS_Compiler));
     compiler->storage = storage;
     compiler->expr_list = NULL;
-    compiler->stmt_list = NULL;
+    compiler->root_stmt_list = NULL;
     compiler->decl_list = NULL;
     compiler->func_list = NULL;
     compiler->current_line = 1;
@@ -31,12 +31,16 @@ void CS_delete_compiler(CS_Compiler* compiler) {
 static CS_Boolean do_mean_check(CS_Compiler* compiler) {
     MeanVisitor* mean_visitor = create_mean_visitor();    
     
-    StatementList* stmt_list = compiler->stmt_list;
+    StatementList* stmt_list = compiler->root_stmt_list;
+    puts("traverse statrt");
+    traverse_stmt_list(stmt_list, (Visitor*)mean_visitor);
+    /*
     while(stmt_list) {
         traverse_stmt(stmt_list->stmt, (Visitor*)mean_visitor);
         stmt_list = stmt_list->next;
     }
-    
+    */
+   puts("traverse end");
     DeclarationList* dp = NULL;
     dp = compiler->decl_list;
     for (int i = 0; dp; dp = dp->next, ++i) {

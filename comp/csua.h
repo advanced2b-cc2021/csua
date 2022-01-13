@@ -1,3 +1,4 @@
+
 /* 
  * File:   csua.h
  * Author: hiroaki
@@ -19,6 +20,14 @@ typedef struct CS_Compiler_tag CS_Compiler;
 
 typedef struct TypeSpecifier_tag TypeSpecifier;
 typedef struct Statement_tag Statement;
+typedef struct IfStatement_tag IfStatement;
+typedef struct ElseIfStatement_tag ElseIfStatement;
+typedef struct ElseIfStatementList_tag ElseIfStatementList;
+typedef struct StatementList_tag StatementList;
+
+typedef uint32_t PC_LABEL;
+
+extern int statement_list_group;
 
 typedef enum {
     CS_FALSE = 0,
@@ -141,14 +150,6 @@ typedef struct {
     Expression         *right;        
 } AssignmentExpression;
 
-/*様々な式があるためそれぞれ構造体を定義する
- 論理否定、マイナスは式の値を反転させるだけなので構造体を用意せず
- 直接expression_tagに定義
-
- */
-
-
-
 struct Expression_tag {
     ExpressionKind kind;
     TypeSpecifier* type; 
@@ -174,7 +175,9 @@ struct Expression_tag {
 typedef enum {
     EXPRESSION_STATEMENT = 1,
     DECLARATION_STATEMENT,
-    STATEMENT_TYPE_COUNT_PLUS_ONE
+    IF_STATEMENT,
+    STATEMENT_BLOCK,
+    STATEMENT_TYPE_COUNT_PLUS_ONE,
 } StatementType;
 
 
@@ -184,8 +187,48 @@ struct Statement_tag {
     union {
         Expression   *expression_s;
         Declaration  *declaration_s;
+        IfStatement  *ifstatement_s;
+        StatementList *statement_block;
     }u;
 
+};
+
+/* IfStatement */
+
+typedef enum {
+    IF_ONLY = 1,
+    IF_ELSE,
+    IF_ELSEIF,
+    IF_ELSEIF_ELSE,
+    IFSTATEMENT_TYPE_COUNT_PLUS_ONE,
+} IfStatementType;
+
+struct IfStatement_tag {
+    IfStatementType type;
+    //int line_number //エラー文表示用？
+    Statement *if_block_stmt;
+    ElseIfStatementList *elseif_stmt_list;
+    Statement *else_block_stmt;
+    Expression *if_expr;
+    /*
+    union {
+        IfOnlyStatement       *ifOnlyStatement;
+        IfElseStatement       *ifElseStatement;
+        IfElseifStatement     *ifElseifStatement;
+        IfElseifElseStatement *ifElseifElseSatement;
+    }u;
+    */
+   //LocationToReplaceList
+};
+
+struct ElseIfStatement_tag {
+    Expression *expression_s;
+    Statement *stmt;
+};
+
+struct ElseIfStatementList_tag {
+    ElseIfStatement *elseIfStatement;
+    struct ElseIfStatementList_tag *next;
 };
 
 /* Temporary used */
@@ -194,10 +237,10 @@ typedef struct ExpressionList_tag {
     struct ExpressionList_tag *next;
 } ExpressionList;
 
-typedef struct StatementList_tag {
+struct StatementList_tag {
     Statement *stmt;
     struct StatementList_tag *next;
-} StatementList;
+};
 
 typedef struct DeclarationList_tag {
     Declaration* decl;
@@ -212,7 +255,7 @@ typedef struct FunctionDeclarationList_tag {
 struct CS_Compiler_tag {
     MEM_Storage      storage;
     ExpressionList          *expr_list; // temporary
-    StatementList           *stmt_list;
+    StatementList           *root_stmt_list;
     DeclarationList         *decl_list;
     FunctionDeclarationList *func_list;
     int current_line;
@@ -248,9 +291,17 @@ typedef struct {
     uint8_t         *code;
 } CS_Executable;
 
+/*
+typedef struct LocationToReplaceList_tag {
+    uint8_t *location_to_replace;
+    struct LocationToReplaceList_tag *next;
+} LocationToReplaceList;
 
-
-
+typedef struct LocationToReplaceListList_tag {
+    LocationToReplaceList location_to_replace_list;
+    struct LocationToReplaceListList_tag *next;
+} LocationToReplaceListList;
+*/
 
 /* create.c */
 //Expression* cs_create_expression(ExpressionKind ekind);
@@ -272,6 +323,9 @@ char* cs_create_identifier(const char* str);
 
 Statement* cs_create_expression_statement(Expression* expr);
 Statement* cs_create_declaration_statement(CS_BasicType type, char* name, Expression* initializer);
+Statement* cs_create_statement_block(StatementList* statement_list);
+Statement* cs_create_if_statement(Expression* if_expr, Statement* if_block_stmt, ElseIfStatementList* elif_list, Statement* else_block_stmt);
+ElseIfStatementList* cs_create_elsif_list(Expression *elsif_expr, Statement *elsif_block_stmt);
 StatementList* cs_create_statement_list(Statement* stmt);
 
 
@@ -300,8 +354,13 @@ Declaration* cs_search_decl_global(const char* name);
 FunctionDeclaration* cs_search_function(const char* name);
 ParameterList* cs_chain_parameter_list(ParameterList* list, CS_BasicType type, char* name);
 ArgumentList* cs_chain_argument_list(ArgumentList* list, Expression* expr);
+ElseIfStatementList* cs_chain_elsif_list(ElseIfStatementList* elsif_list, Expression *elsif_expr, Statement *elsif_block_stmt);
+void print_ExpressionKind(int);
 
 /* scanner.c */
 int get_current_line();
+
+
 #endif /* CSUA_H */
+
 

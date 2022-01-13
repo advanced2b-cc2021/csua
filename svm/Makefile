@@ -1,8 +1,9 @@
+
 CC = /usr/bin/gcc
 
 TARGET = svm
 CFLAGS = -c -g -DDEBUG
-LINK	= -lm
+LINK = -lm
 MEMORY = ../memory/memory.o ../memory/storage.o
 
 OBJS = svm.o opinfo.o native.o
@@ -18,4 +19,5 @@ $(TARGET): $(OBJS) $(MEMORY)
 
 clean:
 	rm -rf $(TARGET) *.o *~ disasm svm
+
 

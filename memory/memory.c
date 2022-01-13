@@ -185,7 +185,6 @@ void* MEM_realloc_func(MEM_Controller controller, char* filename, int line, void
         real_ptr = NULL;
         old_size = 0;
     }
-           
     new_ptr = realloc(real_ptr, alloc_size);
     if (new_ptr == NULL) {
         fprintf(stderr, "realloc error");

@@ -8,8 +8,23 @@
 
 
 static size_t get_opsize(OpcodeInfo *op) {
-    size_t size = strlen(op->parameter);
-    size *= 2;    
+    size_t size = 0;
+    for (int j = 0; j < strlen(op->parameter); ++j) {
+        switch (op->parameter[j]) {
+            case 'i': {
+                size += 2;
+                break;
+            }
+            case '4': {
+                size += 4;
+                break;
+            }
+            default: {
+                fprintf(stderr, "unknown parameter [%c]in disassemble\n", op->parameter[j]);
+                break;
+            }
+        }
+    }
     return size;
 }
 
@@ -21,11 +36,10 @@ static void gen_byte_code(CodegenVisitor* visitor, SVM_Opcode op, ...) {
     OpcodeInfo oInfo = svm_opcode_info[op];
     printf("-->%s\n", oInfo.opname);
     printf("-->%s\n", oInfo.parameter);
-    
+    //printf("%d  %d  %d\n", (visitor->pos + 1 + 1 + (get_opsize(&oInfo))), visitor->current_code_size, (visitor->current_code_size + visitor->CODE_ALLOC_SIZE));
     // pos + 1byte + operator (1byte) + operand_size
     if ((visitor->pos + 1 + 1 + (get_opsize(&oInfo))) > visitor->current_code_size) {
-        visitor->code = MEM_realloc(visitor->code,
-                visitor->current_code_size += visitor->CODE_ALLOC_SIZE);        
+        visitor->code = MEM_realloc(visitor->code, visitor->current_code_size += visitor->CODE_ALLOC_SIZE);        
     }
     
     visitor->code[visitor->pos++] = op & 0xff;
@@ -38,6 +52,14 @@ static void gen_byte_code(CodegenVisitor* visitor, SVM_Opcode op, ...) {
                 visitor->code[visitor->pos++] = operand        & 0xff;                
                 break;
             }
+            case '4': {
+                uint32_t operand = va_arg(ap, uint32_t);
+                visitor->code[visitor->pos++] = (operand >> 24) & 0xff;
+                visitor->code[visitor->pos++] = (operand >> 16) & 0xff;
+                visitor->code[visitor->pos++] = (operand >>  8) & 0xff;
+                visitor->code[visitor->pos++] = (operand      ) & 0xff;
+                break;
+            }
             default: {
                 fprintf(stderr, "undefined parameter\n");
                 exit(1);
@@ -47,6 +69,24 @@ static void gen_byte_code(CodegenVisitor* visitor, SVM_Opcode op, ...) {
     }    
     va_end(ap);    
 }
+
+static void skip_4byte_code(CodegenVisitor* visitor) {
+    visitor->pos += 4;
+    if (visitor->pos >= visitor->current_code_size) {
+        visitor->code = MEM_realloc(visitor->code,
+                visitor->current_code_size + visitor->CODE_ALLOC_SIZE);
+    }
+}
+
+static void replace_4byte_code(CodegenVisitor *visitor, uint32_t replace_point, uint32_t label) {
+    //printf("%d %d %d\n", replace_point, label, visitor->pos);
+    visitor->code[replace_point  ] = (label >> 24) & 0xff;
+    visitor->code[replace_point+1] = (label >> 16) & 0xff;
+    visitor->code[replace_point+2] = (label >>  8) & 0xff;
+    visitor->code[replace_point+3] = (label      ) & 0xff;
+}
+
+
 
 static int add_constant(CS_Executable* exec, CS_ConstantPool* cpp) {
     exec->constant_pool = MEM_realloc(exec->constant_pool, 
@@ -128,7 +168,7 @@ static void enter_identexpr(Expression* expr, Visitor* visitor) {
 //    fprintf(stderr, "enter identifierexpr : %s\n", expr->u.identifier.name);
 }
 static void leave_identexpr(Expression* expr, Visitor* visitor) {
-    fprintf(stderr, "leave identifierexpr\n");            
+    //fprintf(stderr, "leave identifierexpr\n");            
     CodegenVisitor* c_visitor = (CodegenVisitor*)visitor;
     switch (c_visitor->vi_state) {
         case VISIT_NORMAL: {
@@ -728,6 +768,7 @@ static void enter_declstmt(Statement* stmt, Visitor* visitor) {
 
 static void leave_declstmt(Statement* stmt, Visitor* visitor) {
 //    fprintf(stderr, "leave declstmt\n");
+//初期化子が指定されているならそれで初期化する
     if (stmt->u.declaration_s->initializer) {
          Declaration* decl = cs_search_decl_in_block(); // dummy
          if (!decl) {
@@ -760,6 +801,73 @@ static void leave_declstmt(Statement* stmt, Visitor* visitor) {
     
 }
 
+static void enter_ifstmt(Statement* stmt, Visitor* visitor) {
+    CodegenVisitor* codegenVisitor = (CodegenVisitor*)visitor;
+    //rabelは0で仮置き
+    gen_byte_code(codegenVisitor, SVM_PUSH_LABEL, (uint32_t)0);
+    //labelを張る位置を覚えておく
+    push_label_replacement_point(codegenVisitor, codegenVisitor->pos-4);
+
+}
+
+static void enter_stmtblock(Statement* stmt, Visitor* visitor) {
+
+}
+
+static void leave_ifstmt(Statement* stmt, Visitor* visitor) {
+    CodegenVisitor* codegenVisitor = (CodegenVisitor*)visitor;
+    //最後のSVM_JUMPかSV_POP_LABEL命令を消してSVM_POP_LABELに変更する
+    codegenVisitor->pos--;
+    gen_byte_code(codegenVisitor, SVM_POP_LABEL);
+
+    //if文の終わりのlabelを記憶していた場所に張る
+    uint32_t replace_point = pop_label_replacement_point(codegenVisitor);
+    if (replace_point == 0xffff) {
+        fprintf(stderr, "underflow label_replacement_point_stack\n");
+    }
+    replace_4byte_code(codegenVisitor, replace_point, codegenVisitor->pos);
+}
+
+static void leave_stmtblock(Statement* stmt, Visitor* visitor) {
+
+}
+
+static void enter_if_expr(Expression* expr, Visitor* visitor) {
+    CodegenVisitor* codegenVisitor = (CodegenVisitor*)visitor;
+    //rabelは0で仮置き
+    //puts("start gen_byte_code");
+    gen_byte_code(codegenVisitor, SVM_PUSH_LABEL, (uint32_t)0);
+    //puts("end gen_byte_code");
+    //labelを張る位置を覚えておく
+    push_label_replacement_point(codegenVisitor, codegenVisitor->pos-4);
+    //puts("end push_label_replacement_point");
+}
+
+static void leave_if_expr(Expression* expr, Visitor* visitor) {
+    gen_byte_code((CodegenVisitor*)visitor, SVM_CJMP);
+}
+
+static void enter_inner_if(Statement *stmt, Visitor* Visitor) {
+    
+}
+
+static void leave_inner_if(Statement* stmt, Visitor* visitor) {
+    CodegenVisitor* codegenVisitor = (CodegenVisitor*)visitor;
+
+    gen_byte_code(codegenVisitor, SVM_JUMP);
+
+    //次の命令へのラベルを記憶していた場所に張る
+    uint32_t replace_point = pop_label_replacement_point(codegenVisitor);
+    if (replace_point == 0xffff) {
+        fprintf(stderr, "underflow label_replacement_point_stack\n");
+    }
+    replace_4byte_code(codegenVisitor, replace_point, codegenVisitor->pos);
+}
+
+static void leave_inner_else(Statement* stmt, Visitor* visitor) {
+    gen_byte_code((CodegenVisitor*)visitor, SVM_POP_LABEL);
+}
+
 
 CodegenVisitor* create_codegen_visitor(CS_Compiler* compiler, CS_Executable *exec) {
     visit_expr* enter_expr_list;
@@ -768,6 +876,10 @@ CodegenVisitor* create_codegen_visitor(CS_Compiler* compiler, CS_Executable *exe
     visit_stmt* leave_stmt_list;
     
     visit_expr* notify_expr_list;
+    
+    //引数のExpressionとstatementは使わないので新しい構造体を定義したほうがいいかもしれないが使いまわす。
+    visit_expr* if_codegen_expr_list;
+    visit_stmt* if_codegen_stmt_list;
     
     if (compiler == NULL || exec == NULL) {
         fprintf(stderr, "Compiler or Executable is NULL\n");
@@ -784,7 +896,8 @@ CodegenVisitor* create_codegen_visitor(CS_Compiler* compiler, CS_Executable *exe
     visitor->vi_state = VISIT_NORMAL;
     visitor->vf_state = VISIT_F_NO;
     visitor->assign_depth = 0;
-    
+    visitor->label_replacement_point_stack = create_unit32_t_stack();
+    visitor->stack_p = 0;
 
     enter_expr_list = (visit_expr*)MEM_malloc(sizeof(visit_expr) * EXPRESSION_KIND_PLUS_ONE);
     leave_expr_list = (visit_expr*)MEM_malloc(sizeof(visit_expr) * EXPRESSION_KIND_PLUS_ONE);
@@ -793,11 +906,16 @@ CodegenVisitor* create_codegen_visitor(CS_Compiler* compiler, CS_Executable *exe
     enter_stmt_list = (visit_stmt*)MEM_malloc(sizeof(visit_stmt) * STATEMENT_TYPE_COUNT_PLUS_ONE);
     leave_stmt_list = (visit_stmt*)MEM_malloc(sizeof(visit_stmt) * STATEMENT_TYPE_COUNT_PLUS_ONE);
     
+    if_codegen_stmt_list = (visit_stmt*)MEM_malloc(sizeof(visit_stmt) * IF_CODEGEN_STMT_TYPE_PLUS_ONE);
+    if_codegen_expr_list = (visit_expr*)MEM_malloc(sizeof(visit_expr) * IF_CODEGEN_EXPR_TYPE_PLUS_ONE);
+
     memset(enter_expr_list, 0, sizeof(visit_expr) * EXPRESSION_KIND_PLUS_ONE);
     memset(leave_expr_list, 0, sizeof(visit_expr) * EXPRESSION_KIND_PLUS_ONE);
     memset(notify_expr_list, 0, sizeof(visit_expr) * EXPRESSION_KIND_PLUS_ONE);    
     memset(enter_stmt_list, 0, sizeof(visit_expr) * STATEMENT_TYPE_COUNT_PLUS_ONE);
     memset(leave_stmt_list, 0, sizeof(visit_expr) * STATEMENT_TYPE_COUNT_PLUS_ONE);
+    memset(if_codegen_stmt_list, 0, sizeof(visit_expr) * IF_CODEGEN_STMT_TYPE_PLUS_ONE);
+    memset(if_codegen_expr_list, 0, sizeof(visit_expr) * IF_CODEGEN_EXPR_TYPE_PLUS_ONE);
 
     
     enter_expr_list[BOOLEAN_EXPRESSION]       = enter_boolexpr;
@@ -827,7 +945,9 @@ CodegenVisitor* create_codegen_visitor(CS_Compiler* compiler, CS_Executable *exe
     
     enter_stmt_list[EXPRESSION_STATEMENT]     = enter_exprstmt;
     enter_stmt_list[DECLARATION_STATEMENT]    = enter_declstmt;
-    
+    enter_stmt_list[IF_STATEMENT]             = enter_ifstmt;
+    enter_stmt_list[STATEMENT_BLOCK]          = enter_stmtblock;
+
     notify_expr_list[ASSIGN_EXPRESSION]       = notify_assignexpr;
     
     
@@ -860,7 +980,22 @@ CodegenVisitor* create_codegen_visitor(CS_Compiler* compiler, CS_Executable *exe
     
     leave_stmt_list[EXPRESSION_STATEMENT]     = leave_exprstmt;
     leave_stmt_list[DECLARATION_STATEMENT]    = leave_declstmt;
-    
+    leave_stmt_list[IF_STATEMENT]             = leave_ifstmt;
+    leave_stmt_list[STATEMENT_BLOCK]          = leave_stmtblock;
+
+
+    if_codegen_expr_list[ENTER_IF_EXPR]       = enter_if_expr;
+    if_codegen_expr_list[LEAVE_IF_EXPR]       = leave_if_expr;
+    if_codegen_expr_list[ENTER_ELSIF_EXPR]    = enter_if_expr;//使いまわし
+    if_codegen_expr_list[LEAVE_ELSIF_EXPR]    = leave_if_expr;//使いまわし
+
+
+    if_codegen_stmt_list[ENTER_INNER_IF]      = enter_inner_if;
+    if_codegen_stmt_list[LEAVE_INNER_IF]      = leave_inner_if;
+    if_codegen_stmt_list[ENTER_INNER_ELSIF]   = enter_inner_if;//使いまわし
+    if_codegen_stmt_list[LEAVE_INNER_ELSIF]   = leave_inner_if;//使いまわし
+    if_codegen_stmt_list[ENTER_INNER_ELSE]    = enter_inner_if;//使いまわし
+    if_codegen_stmt_list[LEAVE_INNER_ELSE]    = leave_inner_else;
     
     ((Visitor*)visitor)->enter_expr_list = enter_expr_list;
     ((Visitor*)visitor)->leave_expr_list = leave_expr_list;
@@ -869,7 +1004,8 @@ CodegenVisitor* create_codegen_visitor(CS_Compiler* compiler, CS_Executable *exe
 
     ((Visitor*)visitor)->notify_expr_list = notify_expr_list;
     
-    
+    ((Visitor*)visitor)->if_codegen_expr_list = if_codegen_expr_list;
+    ((Visitor*)visitor)->if_codegen_stmt_list = if_codegen_stmt_list;
     
     
     return visitor;
