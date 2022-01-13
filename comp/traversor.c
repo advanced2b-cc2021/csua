@@ -122,8 +122,37 @@ static void traverse_if_stmt(Statement* stmt, Visitor* visitor) {
     
 }
 //while statement
-//static void traverse_while_stmt(Statement* stmt, Visitor* visitor){
-//	WhileStatement whilestmt = stmt->u.whilestatement_s;
+//1. travers expression to evaluate
+//2. travers statement block
+//3. get start LABEL
+//4. get end LABEL
+//
+static void traverse_while_stmt(Statement* stmt, Visitor* visitor){
+	WhileStatement *whilestmt = stmt->u.whilestatement_s;
+	
+	//traverse expression 
+	if(visitor->while_codegen_expr_list){
+		visitor->while_codegen_expr_list[ENTER_WHILE_EXPR](whilestmt->while_expr, visitor);
+		traverse_expr(whilestmt->while_expr, visitor);
+		//constant JUMP
+		visitor->while_codegen_expr_list[LEAVE_WHILE_EXPR](whilestmt->while_expr, visitor);
+	}else {
+		traverse_expr(whilestmt->while_expr, visitor);
+	}
+
+	//traverse statement block
+	if(visitor->while_codegen_stmt_list){
+		visitor->while_codegen_stmt_list[ENTER_WHILE_STMT](whilestmt->while_block_stmt, visitor);
+		traverse_stmt_list(whilestmt->while_block_stmt->u.statement_block, visitor);
+		visitor->while_codegen_stmt_list[LEAVE_WHILE_STMT](whilestmt->while_block_stmt, visitor);
+	} else {
+	
+		traverse_stmt_list(whilestmt->while_block_stmt->u.statement_block, visitor);
+	}
+}
+
+
+}
 	
 
 static void traverse_stmt_children(Statement* stmt, Visitor* visitor) {
@@ -140,6 +169,10 @@ static void traverse_stmt_children(Statement* stmt, Visitor* visitor) {
             traverse_if_stmt(stmt, visitor);
             break;
         }
+	case WHILE_STATEMENT: {
+	    traverse_while_stmt(stmt, visitor);
+	    break;
+	}
         case STATEMENT_BLOCK: {
             traverse_stmt_list(stmt->u.statement_block, visitor);
             break;

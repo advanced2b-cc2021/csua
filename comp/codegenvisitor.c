@@ -810,18 +810,22 @@ static void enter_ifstmt(Statement* stmt, Visitor* visitor) {
 
 }
 //while statement
-/*static void enter_whilestmt(Statement* stmt,Visitor* visitor){
+static void enter_eval_stmt(Statement* stmt,Visitor* visitor){
     CodegenVisitor* codegenVisitor = (CodegenVisitor*)visitor;
     //push LABEL LO
-    gen_bytecode(codegenVisitor, SVM_PUSH_LABEL, (uint32_t)0);
+    gen_byte_code(codegenVisitor, SVM_PUSH_LABEL, (uint32_t)0);
+    push_label_replavement_point(codegenVisitor, codegenVisitor->pos-4);
 
 
-}*/
+}
 
-static void leave_whilestmt(Visitor* visitor){
+static void leave_eval_stmt(Visitor* visitor){
     CodegenVisitor* codegenVisitor = (CodegenVisitor*)visitor;
+    codegenVisitor->pos--;
     gen_byte_code(codegenVisitor, SVM_POP_LABEL);
+    uint32_t replace_point = pop_label_replacement_point(codegenVisitor);
 
+    replace_4byte_code(codegenVisitor, replace_point, codeVisitor->pos);
 }
 
 static void enter_stmtblock(Statement* stmt, Visitor* visitor) {
@@ -881,8 +885,17 @@ static void leave_inner_if(Statement* stmt, Visitor* visitor) {
 static void leave_inner_else(Statement* stmt, Visitor* visitor) {
     gen_byte_code((CodegenVisitor*)visitor, SVM_POP_LABEL);
 }
-
-
+static void enter_eval_expr(Statement* stmt, Visitor* visitor){
+    CodegenVisitor* codegenVisitor = (CodegenVisitor*)visitor;
+    gen_byte_code(codegenVisitor, SVM_PUSH_LABEL, (uint32_t)0);
+    push_label_replacement_point(codegenVisitor, codegenVisitor->pos-4);
+}
+static void leave_eval_expr(Visitor* visitor){
+    CodegenVisitor* codegenVisitor = (CodegenVisitor*)visitor;
+    gen_byte_code(codegenVisitor, SVM_JUMP);
+    uint32_t replace_point = pop_label_replacement_point(codegenVisitor);
+    replace_4byte_code(codegenVisitor, replace_point, codegenVisitor->pos);
+}
 CodegenVisitor* create_codegen_visitor(CS_Compiler* compiler, CS_Executable *exec) {
     visit_expr* enter_expr_list;
     visit_expr* leave_expr_list;

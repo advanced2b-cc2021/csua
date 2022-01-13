@@ -30,7 +30,8 @@ struct Visitor_tag {
 
     visit_stmt* if_codegen_stmt_list;
     visit_expr* if_codegen_expr_list;
-    visit_stmt* while_codegen_list;
+    visit_stmt* while_codegen_stmt_list;
+    visit_expr* while_codegen_stmt_list;
 };
 
 struct MeanVisitor_tag {
@@ -69,6 +70,13 @@ typedef enum {
     IF_CODEGEN_STMT_TYPE_PLUS_ONE,
 } IF_CODEGEN_STMT_TYPE;
 
+typedef enum {
+	ENTER_WHILE_STMT,
+	LEAVE_WHILE_STMT,
+	ENTER_WHILE_EXPR,
+	LEAVE_WHILE_EXPR,
+	WHILE_CODEGEN_TYPE_PLUS_ONE
+} WHILE_CODEGEN_TYPE;
 struct CodegenVisitor_tag {
     Visitor        visitor;
     CS_Compiler   *compiler;
