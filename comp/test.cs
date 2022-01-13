@@ -1,15 +1,4 @@
-
-if(TRUE_T){
-	print();
-	print();
-}else{
-	print();
-	print();
+while(true){
+	int i;
+	int j;
 }
-
-if(TRUE_T){
-	print();
-}elsif(FALSE){
-	print();
-}
-

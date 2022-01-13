@@ -23,6 +23,7 @@ typedef struct Statement_tag Statement;
 typedef struct IfStatement_tag IfStatement;
 typedef struct ElseIfStatement_tag ElseIfStatement;
 typedef struct ElseIfStatementList_tag ElseIfStatementList;
+typedef struct WhileStatement_tag WhileStatement;
 typedef struct StatementList_tag StatementList;
 
 typedef uint32_t PC_LABEL;
@@ -177,6 +178,7 @@ typedef enum {
     DECLARATION_STATEMENT,
     IF_STATEMENT,
     STATEMENT_BLOCK,
+    WHILE_STATEMENT,
     STATEMENT_TYPE_COUNT_PLUS_ONE,
 } StatementType;
 
@@ -188,6 +190,7 @@ struct Statement_tag {
         Expression   *expression_s;
         Declaration  *declaration_s;
         IfStatement  *ifstatement_s;
+        WhileStatement *whilestatement_s;
         StatementList *statement_block;
     }u;
 
@@ -231,6 +234,10 @@ struct ElseIfStatementList_tag {
     struct ElseIfStatementList_tag *next;
 };
 
+struct WhileStatement_tag {
+    Expression while_expr;
+    
+};
 /* Temporary used */
 typedef struct ExpressionList_tag {
     Expression *expression;

@@ -79,7 +79,7 @@
                  
 %type <assignment_operator> assignment_operator
 %type <type_specifier> type_specifier
-%type <statement> statement declaration_statement statement_block if_statement broad_statement
+%type <statement> statement declaration_statement statement_block if_statement broad_statement while_statement
 %type <elsif_list> elsif_list
 %type <statement_list> statement_list
 %type <function_declaration> function_definition
@@ -187,6 +187,15 @@ broad_statement
                 }
                 $$ = $1;
         }
+        | while_statement
+        {
+                 CS_Compiler* compiler = cs_get_current_compiler();
+                if (compiler) {
+                        fprintf(stderr, "line %d :broad_statement 3 ", compiler->current_line);
+                }
+                $$ = $1;
+
+        }
         ;
 
 if_statement
@@ -209,7 +218,7 @@ if_statement
         }
         | IF LP expression RP statement_block            ELSE statement_block
         {
-                //Done
+                //Done;
                 CS_Compiler* compiler = cs_get_current_compiler();
                 if (compiler) {
                         fprintf(stderr, "line %d :if_statement 3 ", compiler->current_line);
@@ -246,6 +255,18 @@ elsif_list
         }
         ;
 
+while_statement
+        : WHILE LP expression RP statement_block
+        {
+                CS_Compiler* compiler = cs_get_current_compiler();
+                if (compiler) {
+                        fprintf(stderr, "line %d :while ", compiler->current_line);
+                }
+                //$$ = cs_create_while_statement();//暫定
+        }
+        |
+        
+        ;
 
 
 function_definition
