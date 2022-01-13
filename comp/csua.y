@@ -19,6 +19,7 @@
     IfStatement         *if_statement;
     ElseIfStatement     *elsif_stmt;
     ElseIfStatementList *elsif_list;
+    WhileStatement      *while_statement;
 }
 
 %token LP
@@ -262,9 +263,8 @@ while_statement
                 if (compiler) {
                         fprintf(stderr, "line %d :while ", compiler->current_line);
                 }
-                //$$ = cs_create_while_statement();//暫定
+                $$ = cs_create_while_statement($3,$5);//暫定
         }
-        |
         
         ;
 

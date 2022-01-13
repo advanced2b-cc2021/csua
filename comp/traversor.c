@@ -121,6 +121,10 @@ static void traverse_if_stmt(Statement* stmt, Visitor* visitor) {
     }
     
 }
+//while statement
+//static void traverse_while_stmt(Statement* stmt, Visitor* visitor){
+//	WhileStatement whilestmt = stmt->u.whilestatement_s;
+	
 
 static void traverse_stmt_children(Statement* stmt, Visitor* visitor) {
     switch(stmt->type) {

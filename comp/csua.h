@@ -209,7 +209,7 @@ typedef enum {
 struct IfStatement_tag {
     IfStatementType type;
     //int line_number //エラー文表示用？
-    Statement *if_block_stmt;
+    Statement *if_block_stmt;//
     ElseIfStatementList *elseif_stmt_list;
     Statement *else_block_stmt;
     Expression *if_expr;
@@ -235,7 +235,8 @@ struct ElseIfStatementList_tag {
 };
 
 struct WhileStatement_tag {
-    Expression while_expr;
+    Expression *while_expr;
+    Statement *block_stmt;
     
 };
 /* Temporary used */
@@ -334,7 +335,7 @@ Statement* cs_create_statement_block(StatementList* statement_list);
 Statement* cs_create_if_statement(Expression* if_expr, Statement* if_block_stmt, ElseIfStatementList* elif_list, Statement* else_block_stmt);
 ElseIfStatementList* cs_create_elsif_list(Expression *elsif_expr, Statement *elsif_block_stmt);
 StatementList* cs_create_statement_list(Statement* stmt);
-
+Statement* cs_create_while_statement(Expression* while_expr, Statement* while_block_stmt);
 
 DeclarationList* cs_create_declaration_list(Declaration* decl);
 TypeSpecifier* cs_create_type_specifier(CS_BasicType type);

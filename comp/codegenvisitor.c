@@ -809,6 +809,20 @@ static void enter_ifstmt(Statement* stmt, Visitor* visitor) {
     push_label_replacement_point(codegenVisitor, codegenVisitor->pos-4);
 
 }
+//while statement
+/*static void enter_whilestmt(Statement* stmt,Visitor* visitor){
+    CodegenVisitor* codegenVisitor = (CodegenVisitor*)visitor;
+    //push LABEL LO
+    gen_bytecode(codegenVisitor, SVM_PUSH_LABEL, (uint32_t)0);
+
+
+}*/
+
+static void leave_whilestmt(Visitor* visitor){
+    CodegenVisitor* codegenVisitor = (CodegenVisitor*)visitor;
+    gen_byte_code(codegenVisitor, SVM_POP_LABEL);
+
+}
 
 static void enter_stmtblock(Statement* stmt, Visitor* visitor) {
 

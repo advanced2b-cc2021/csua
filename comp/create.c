@@ -194,6 +194,15 @@ ElseIfStatementList* cs_create_elsif_list(Expression *elsif_expr, Statement *els
     return elsif_list;
 }
 
+//create while
+Statement* cs_create_while_statement(Expression *while_expr, Statement* while_block_stmt){
+	WhileStatement *while_stmt = (WhileStatement*)cs_malloc(sizeof(WhileStatement));
+	while_stmt->while_expr = while_expr;
+	while_stmt->block_stmt = while_block_stmt;
+	Statement* stmt = cs_create_statement(WHILE_STATEMENT);
+	stmt->u.whilestatement_s = while_stmt;
+	return stmt;
+}
 
 Statement* cs_create_expression_statement(Expression* expr) {
     Statement* stmt = cs_create_statement(EXPRESSION_STATEMENT);

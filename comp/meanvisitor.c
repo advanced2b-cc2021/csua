@@ -582,6 +582,13 @@ static void leave_ifstmt(Statement* stmt, Visitor* visitor) {
     //fprintf(stderr, "leave ifstmt\n");
 }
 
+static void enter_whilestmt(){
+    //fprintf(stderr, "leave while stmt\n");
+}
+static void leave_whilestmt(){
+    //fprintf(stderr, "leave while stmt\n");
+}
+
 static void enter_stmtblock(Statement* stmt, Visitor* visitor) {
     //fprintf(stderr, "enter stmtblock!!\n");
 }

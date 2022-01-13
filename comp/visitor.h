@@ -30,6 +30,7 @@ struct Visitor_tag {
 
     visit_stmt* if_codegen_stmt_list;
     visit_expr* if_codegen_expr_list;
+    visit_stmt* while_codegen_list;
 };
 
 struct MeanVisitor_tag {
