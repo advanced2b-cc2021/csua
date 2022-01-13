@@ -133,6 +133,11 @@ statement_block
                 }
                 $$ = cs_create_statement_block($2);
         }
+        | LC RC
+        {
+                CS_Compiler* compiler = cs_get_current_compiler();
+                $$ = NULL;
+        }
         ;
 
 statement_list
