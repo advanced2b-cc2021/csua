@@ -391,7 +391,7 @@ static void enter_whilestmt(Statement* stmt, Visitor* visitor) {
 	fprintf(stderr, "enter while statement\n");
 	increment();
 }
-static void leave_whilestmt(){
+static void leave_whilestmt(Statement* stmt, Visitor* viistor){
 	decrement();
 	print_depth();
 	fprintf(stderr, "leave while statement\n");
@@ -484,6 +484,10 @@ Visitor* create_treeview_visitor() {
     visitor->notify_expr_list = NULL;
     visitor->if_codegen_expr_list = NULL;
     visitor->if_codegen_stmt_list = NULL;
+    visitor->while_codegen_expr_list = NULL;
+    visitor->while_codegen_stmt_list = NULL;
+    
+    
     
     
 

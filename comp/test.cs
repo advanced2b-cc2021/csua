@@ -1,4 +1,5 @@
-while(true){
-	int i;
-	int j;
+int i = 0;
+
+while(i < 10){
+	i++;
 }

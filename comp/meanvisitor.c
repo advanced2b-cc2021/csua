@@ -582,10 +582,10 @@ static void leave_ifstmt(Statement* stmt, Visitor* visitor) {
     //fprintf(stderr, "leave ifstmt\n");
 }
 
-static void enter_whilestmt(){
+static void enter_whilestmt(Statement* stmt, Visitor* visitor){
     //fprintf(stderr, "leave while stmt\n");
 }
-static void leave_whilestmt(){
+static void leave_whilestmt(Statement* stmt, Visitor* visitor){
     //fprintf(stderr, "leave while stmt\n");
 }
 
@@ -643,12 +643,13 @@ MeanVisitor* create_mean_visitor() {
     enter_expr_list[LOGICAL_NOT_EXPRESSION]   = enter_lognotexpr;
     enter_expr_list[ASSIGN_EXPRESSION]        = enter_assignexpr;
     enter_expr_list[FUNCTION_CALL_EXPRESSION] = enter_funccallexpr;
-    enter_expr_list[CAST_EXPRESSION]          = enter_castexpr;    
+    enter_expr_list[CAST_EXPRESSION]          = enter_castexpr;
     
     enter_stmt_list[EXPRESSION_STATEMENT]     = enter_exprstmt;
     enter_stmt_list[DECLARATION_STATEMENT]    = enter_declstmt;
     enter_stmt_list[IF_STATEMENT]             = enter_ifstmt;
     enter_stmt_list[STATEMENT_BLOCK]          = enter_stmtblock;
+    enter_stmt_list[WHILE_STATEMENT]          = enter_whilestmt;
     
 
     
@@ -682,6 +683,7 @@ MeanVisitor* create_mean_visitor() {
     leave_stmt_list[DECLARATION_STATEMENT]    = leave_declstmt;
     leave_stmt_list[IF_STATEMENT]             = leave_ifstmt;
     leave_stmt_list[STATEMENT_BLOCK]          = leave_stmtblock;
+    leave_stmt_list[WHILE_STATEMENT]          = leave_whilestmt;
     
 
     ((Visitor*)visitor)->enter_expr_list = enter_expr_list;
@@ -691,6 +693,8 @@ MeanVisitor* create_mean_visitor() {
     ((Visitor*)visitor)->notify_expr_list = NULL;
     ((Visitor*)visitor)->if_codegen_expr_list = NULL;
     ((Visitor*)visitor)->if_codegen_stmt_list = NULL;
+    ((Visitor*)visitor)->while_codegen_expr_list = NULL;
+    ((Visitor*)visitor)->while_codegen_stmt_list = NULL;
 
     
     

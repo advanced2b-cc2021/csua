@@ -93,14 +93,14 @@ translation_unit
         {
                 CS_Compiler* compiler = cs_get_current_compiler();
                 if (compiler) {
-                        fprintf(stderr, "line %d : translation_unit 1 ", compiler->current_line);
+                        //fprintf(stderr, "line %d : translation_unit 1 ", compiler->current_line);
                 }
         }
         | definition_or_statement_list
         {
                 CS_Compiler* compiler = cs_get_current_compiler();
                 if (compiler) {
-                        fprintf(stderr, "line %d : translation_unit 2 ", compiler->current_line);
+                        //fprintf(stderr, "line %d : translation_unit 2 ", compiler->current_line);
                 }
         }
         ;
@@ -113,14 +113,14 @@ definition_or_statement_list
            CS_Compiler* compiler = cs_get_current_compiler();
            if (compiler) {
                compiler->func_list = cs_chain_function_declaration_list(compiler->func_list, $1);
-                fprintf(stderr, "line %d :definition_or_statement_list 1 ", compiler->current_line);
+                //fprintf(stderr, "line %d :definition_or_statement_list 1 ", compiler->current_line);
            }
         }
         | statement_list {
            CS_Compiler* compiler = cs_get_current_compiler();
            if (compiler) {
                compiler->root_stmt_list = $1;
-               fprintf(stderr, "line %d :definition_or_statement_list 2 ", compiler->current_line);
+               //fprintf(stderr, "line %d :definition_or_statement_list 2 ", compiler->current_line);
            }
         }
         ;
@@ -130,7 +130,7 @@ statement_block
         {
                 CS_Compiler* compiler = cs_get_current_compiler();
                 if (compiler) {
-                        fprintf(stderr, "line %d : statement_block", compiler->current_line);
+                        //fprintf(stderr, "line %d : statement_block", compiler->current_line);
                 }
                 $$ = cs_create_statement_block($2);
         }
@@ -146,7 +146,7 @@ statement_list
         {
                 CS_Compiler* compiler = cs_get_current_compiler();
                 if (compiler) {
-                        fprintf(stderr, "line %d : statement_list 1 ", compiler->current_line);
+                        //fprintf(stderr, "line %d : statement_list 1 ", compiler->current_line);
                 }
                 $$ = cs_chain_statement_list($1, $2);
         }
@@ -155,9 +155,9 @@ statement_list
                 CS_Compiler* compiler = cs_get_current_compiler();
                 StatementList* stmt_list = cs_create_statement_list($1);
                 if (compiler->root_stmt_list == NULL) {
-                        fprintf(stderr, "root_stmt_list = %p\n", stmt_list);
+                        //fprintf(stderr, "root_stmt_list = %p\n", stmt_list);
                         compiler->root_stmt_list = stmt_list;
-                        fprintf(stderr, "line %d :statement_list 2 ", compiler->current_line);
+                        //fprintf(stderr, "line %d :statement_list 2 ", compiler->current_line);
                 }
                 $$ = stmt_list;
         }
@@ -168,7 +168,7 @@ broad_statement
         {
            CS_Compiler* compiler = cs_get_current_compiler();
            if (compiler) {
-               fprintf(stderr, "line %d :broad_statement 1 ", compiler->current_line);
+               //fprintf(stderr, "line %d :broad_statement 1 ", compiler->current_line);
            }
            $$ = $1;
         }
@@ -176,7 +176,7 @@ broad_statement
         {
                 CS_Compiler* compiler = cs_get_current_compiler();
                 if (compiler) {
-                        fprintf(stderr, "line %d :broad_statement 2 ", compiler->current_line);
+                        //fprintf(stderr, "line %d :broad_statement 2 ", compiler->current_line);
                 }
                 $$ = $1;
         }
@@ -184,7 +184,7 @@ broad_statement
         {
                 CS_Compiler* compiler = cs_get_current_compiler();
                 if (compiler) {
-                        fprintf(stderr, "line %d :broad_statement 3 ", compiler->current_line);
+                        //fprintf(stderr, "line %d :broad_statement 3 ", compiler->current_line);
                 }
                 $$ = $1;
         }
@@ -192,7 +192,7 @@ broad_statement
         {
                  CS_Compiler* compiler = cs_get_current_compiler();
                 if (compiler) {
-                        fprintf(stderr, "line %d :broad_statement 3 ", compiler->current_line);
+                        //fprintf(stderr, "line %d :broad_statement 3 ", compiler->current_line);
                 }
                 $$ = $1;
 
@@ -204,7 +204,7 @@ if_statement
         {
                 CS_Compiler* compiler = cs_get_current_compiler();
                 if (compiler) {
-                        fprintf(stderr, "line %d :if_statement 1 ", compiler->current_line);
+                        //fprintf(stderr, "line %d :if_statement 1 ", compiler->current_line);
                 }
                 $$ = cs_create_if_statement($3, $5, $6, $8);
         }
@@ -213,7 +213,7 @@ if_statement
                 //Done
                 CS_Compiler* compiler = cs_get_current_compiler();
                 if (compiler) {
-                        fprintf(stderr, "line %d :if_statement 2 ", compiler->current_line);
+                        //fprintf(stderr, "line %d :if_statement 2 ", compiler->current_line);
                 }
                 $$ = cs_create_if_statement($3, $5, $6, NULL);
         }
@@ -222,7 +222,7 @@ if_statement
                 //Done;
                 CS_Compiler* compiler = cs_get_current_compiler();
                 if (compiler) {
-                        fprintf(stderr, "line %d :if_statement 3 ", compiler->current_line);
+                        //fprintf(stderr, "line %d :if_statement 3 ", compiler->current_line);
                 }
                 $$ = cs_create_if_statement($3, $5, NULL, $7);
         }
@@ -231,7 +231,7 @@ if_statement
                 //Done
                 CS_Compiler* compiler = cs_get_current_compiler();
                 if (compiler) {
-                        //fprintf(stderr, "line %d :if_statement 4 ", compiler->current_line);
+                        ////fprintf(stderr, "line %d :if_statement 4 ", compiler->current_line);
                 }
                 $$ = cs_create_if_statement($3, $5, NULL, NULL);
         }
@@ -242,7 +242,7 @@ elsif_list
         {
                 CS_Compiler* compiler = cs_get_current_compiler();
                 if (compiler) {
-                        fprintf(stderr, "line %d :elsif_list 1 ", compiler->current_line);
+                        //fprintf(stderr, "line %d :elsif_list 1 ", compiler->current_line);
                 }
                 $$ = cs_chain_elsif_list($1, $4, $6);
         }
@@ -250,7 +250,7 @@ elsif_list
         {
                 CS_Compiler* compiler = cs_get_current_compiler();
                 if (compiler) {
-                        fprintf(stderr, "line %d :elsif_list 2 ", compiler->current_line);
+                        //fprintf(stderr, "line %d :elsif_list 2 ", compiler->current_line);
                 }
                 $$ = cs_create_elsif_list($3, $5);
         }
@@ -261,7 +261,7 @@ while_statement
         {
                 CS_Compiler* compiler = cs_get_current_compiler();
                 if (compiler) {
-                        fprintf(stderr, "line %d :while ", compiler->current_line);
+                        //fprintf(stderr, "line %d :while ", compiler->current_line);
                 }
                 $$ = cs_create_while_statement($3,$5);//暫定
         }
@@ -273,12 +273,12 @@ function_definition
         : type_specifier IDENTIFIER LP RP SEMICOLON
         {
                 $$ = cs_create_function_declaration($1, $2, NULL);
-                fprintf(stderr, "function_definition 1\n");
+                //fprintf(stderr, "function_definition 1\n");
         }
         | type_specifier IDENTIFIER LP parameter_list RP SEMICOLON
         {
                 $$ = cs_create_function_declaration($1, $2, $4);
-                fprintf(stderr, "function_definition 2\n");
+                //fprintf(stderr, "function_definition 2\n");
         }
         ;
         
@@ -302,10 +302,10 @@ statement
      */
                 CS_Compiler* compiler = cs_get_current_compiler();
                 if (compiler) {
-                        fprintf(stderr, "line %d :", compiler->current_line);
+                        //fprintf(stderr, "line %d :", compiler->current_line);
                 }
 
-            fprintf(stderr, "statement\n");
+            //fprintf(stderr, "statement\n");
 
             $$ = cs_create_expression_statement($1);
         }
@@ -421,9 +421,9 @@ yyerror(char const *str)
     extern char *yytext;
     CS_Compiler* compiler = cs_get_current_compiler();
     if (compiler) {
-        fprintf(stderr, "line %d :", compiler->current_line);
+        //fprintf(stderr, "line %d :", compiler->current_line);
     }
     
-    fprintf(stderr, "parser error near %s\n", yytext);
+    //fprintf(stderr, "parser error near %s\n", yytext);
     return 0;
 }

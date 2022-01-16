@@ -134,7 +134,6 @@ static void traverse_while_stmt(Statement* stmt, Visitor* visitor){
 	if(visitor->while_codegen_expr_list){
 		visitor->while_codegen_expr_list[ENTER_WHILE_EXPR](whilestmt->while_expr, visitor);
 		traverse_expr(whilestmt->while_expr, visitor);
-		//constant JUMP
 		visitor->while_codegen_expr_list[LEAVE_WHILE_EXPR](whilestmt->while_expr, visitor);
 	}else {
 		traverse_expr(whilestmt->while_expr, visitor);
@@ -142,18 +141,17 @@ static void traverse_while_stmt(Statement* stmt, Visitor* visitor){
 
 	//traverse statement block
 	if(visitor->while_codegen_stmt_list){
-		visitor->while_codegen_stmt_list[ENTER_WHILE_STMT](whilestmt->while_block_stmt, visitor);
+		visitor->while_codegen_stmt_list[ENTER_INNER_WHILE_STMT](whilestmt->while_block_stmt, visitor);
 		traverse_stmt_list(whilestmt->while_block_stmt->u.statement_block, visitor);
-		visitor->while_codegen_stmt_list[LEAVE_WHILE_STMT](whilestmt->while_block_stmt, visitor);
+		visitor->while_codegen_stmt_list[LEAVE_INNER_WHILE_STMT](whilestmt->while_block_stmt, visitor);
+		//visitor->while_codegen_stmt_list[LEAVE_WHILE_STMT](whilestmt->while_block_stmt, visitor);
 	} else {
+
 	
 		traverse_stmt_list(whilestmt->while_block_stmt->u.statement_block, visitor);
 	}
 }
 
-
-}
-	
 
 static void traverse_stmt_children(Statement* stmt, Visitor* visitor) {
     switch(stmt->type) {

@@ -1,4 +1,3 @@
-print();
-print();
-
-int func()
+if (true) {
+	int i = 0;
+}

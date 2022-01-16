@@ -236,7 +236,7 @@ struct ElseIfStatementList_tag {
 
 struct WhileStatement_tag {
     Expression *while_expr;
-    Statement *block_stmt;
+    Statement *while_block_stmt;
     
 };
 /* Temporary used */
