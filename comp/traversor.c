@@ -64,13 +64,17 @@ static void traverse_if_stmt(Statement* stmt, Visitor* visitor) {
 
     if (visitor->if_codegen_stmt_list) {
         //codegenvisitor
-        visitor->if_codegen_stmt_list[ENTER_INNER_IF](ifstmt->if_block_stmt, visitor);
-        traverse_stmt_list(ifstmt->if_block_stmt->u.statement_block, visitor);
+        	visitor->if_codegen_stmt_list[ENTER_INNER_IF](ifstmt->if_block_stmt, visitor);
+	if (ifstmt->if_block_stmt) {
+        	traverse_stmt_list(ifstmt->if_block_stmt->u.statement_block, visitor);
+	}
         //強制JUMMP命令
         //次のブロックの先頭のラベルを記憶位置に張る
         visitor->if_codegen_stmt_list[LEAVE_INNER_IF](ifstmt->if_block_stmt, visitor);
     } else {
-        traverse_stmt_list(ifstmt->if_block_stmt->u.statement_block, visitor);
+    	if (ifstmt->if_block_stmt) {
+        	traverse_stmt_list(ifstmt->if_block_stmt->u.statement_block, visitor);
+	}
     }
 
     //fprintf(stderr, "leave if block\n");
@@ -92,12 +96,16 @@ static void traverse_if_stmt(Statement* stmt, Visitor* visitor) {
 
             if (visitor->if_codegen_stmt_list) {
                 visitor->if_codegen_stmt_list[ENTER_INNER_ELSIF](elsif_list->elseIfStatement->stmt, visitor);
-                traverse_stmt_list(elsif_list->elseIfStatement->stmt->u.statement_block, visitor);
+		if (elsif_list->elseIfStatement->stmt) {
+                	traverse_stmt_list(elsif_list->elseIfStatement->stmt->u.statement_block, visitor);
+		}
                 //強制JUMP命令
                 //次のブロックの先頭のラベルを記憶位置に張る
                 visitor->if_codegen_stmt_list[LEAVE_INNER_ELSIF](elsif_list->elseIfStatement->stmt, visitor);
             } else {
-                traverse_stmt_list(elsif_list->elseIfStatement->stmt->u.statement_block, visitor);
+	    	if (elsif_list->elseIfStatement->stmt) {
+                	traverse_stmt_list(elsif_list->elseIfStatement->stmt->u.statement_block, visitor);
+		}
             }
 
             elsif_list = elsif_list->next;
@@ -110,17 +118,54 @@ static void traverse_if_stmt(Statement* stmt, Visitor* visitor) {
 
         if (visitor->if_codegen_stmt_list) {
             visitor->if_codegen_stmt_list[ENTER_INNER_ELSE](ifstmt->else_block_stmt, visitor);
-            traverse_stmt_list(ifstmt->else_block_stmt->u.statement_block, visitor);
+	    	if (ifstmt->else_block_stmt) {
+            	traverse_stmt_list(ifstmt->else_block_stmt->u.statement_block, visitor);
+			}
             //ラベルpop命令
             visitor->if_codegen_stmt_list[LEAVE_INNER_ELSE](ifstmt->else_block_stmt, visitor);
         } else {
-            traverse_stmt_list(ifstmt->else_block_stmt->u.statement_block, visitor);
+			if (ifstmt->else_block_stmt) {
+            	traverse_stmt_list(ifstmt->else_block_stmt->u.statement_block, visitor);
+			}
         }
 
         //fprintf(stderr, "leave else\n");
     }
     
 }
+//while statement
+//1. travers expression to evaluate
+//2. travers statement block
+//3. get start LABEL
+//4. get end LABEL
+//
+static void traverse_while_stmt(Statement* stmt, Visitor* visitor){
+	WhileStatement *whilestmt = stmt->u.whilestatement_s;
+	
+	//traverse expression 
+	if(visitor->while_codegen_expr_list){
+		visitor->while_codegen_expr_list[ENTER_WHILE_EXPR](whilestmt->while_expr, visitor);
+		traverse_expr(whilestmt->while_expr, visitor);
+		visitor->while_codegen_expr_list[LEAVE_WHILE_EXPR](whilestmt->while_expr, visitor);
+	}else {
+		traverse_expr(whilestmt->while_expr, visitor);
+	}
+
+	//traverse statement block
+	if(visitor->while_codegen_stmt_list){
+		visitor->while_codegen_stmt_list[ENTER_INNER_WHILE_STMT](whilestmt->while_block_stmt, visitor);
+		if (whilestmt->while_block_stmt) {
+			traverse_stmt_list(whilestmt->while_block_stmt->u.statement_block, visitor);
+		}
+		visitor->while_codegen_stmt_list[LEAVE_INNER_WHILE_STMT](whilestmt->while_block_stmt, visitor);
+		//visitor->while_codegen_stmt_list[LEAVE_WHILE_STMT](whilestmt->while_block_stmt, visitor);
+	} else {
+		if(whilestmt->while_block_stmt){
+			traverse_stmt_list(whilestmt->while_block_stmt->u.statement_block, visitor);
+		}
+	}
+}
+
 
 static void traverse_stmt_children(Statement* stmt, Visitor* visitor) {
     switch(stmt->type) {
@@ -136,6 +181,10 @@ static void traverse_stmt_children(Statement* stmt, Visitor* visitor) {
             traverse_if_stmt(stmt, visitor);
             break;
         }
+	case WHILE_STATEMENT: {
+	    traverse_while_stmt(stmt, visitor);
+	    break;
+	}
         case STATEMENT_BLOCK: {
             traverse_stmt_list(stmt->u.statement_block, visitor);
             break;

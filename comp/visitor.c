@@ -386,6 +386,18 @@ static void leave_stmtblock(Statement* stmt, Visitor* visitor) {
     print_depth();
     fprintf(stderr, "leave stmtblock!!\n");
 }
+static void enter_whilestmt(Statement* stmt, Visitor* visitor) {
+	print_depth();
+	fprintf(stderr, "enter while statement\n");
+	increment();
+}
+static void leave_whilestmt(Statement* stmt, Visitor* viistor){
+	decrement();
+	print_depth();
+	fprintf(stderr, "leave while statement\n");
+}
+
+
 
 Visitor* create_treeview_visitor() {
     visit_expr* enter_expr_list;
@@ -430,7 +442,7 @@ Visitor* create_treeview_visitor() {
     enter_stmt_list[DECLARATION_STATEMENT]    = enter_declstmt;
     enter_stmt_list[IF_STATEMENT]             = enter_ifstmt;
     enter_stmt_list[STATEMENT_BLOCK]          = enter_stmtblock;
-    
+    enter_stmt_list[WHILE_STATEMENT]          = enter_whilestmt;
     
     
     leave_expr_list[BOOLEAN_EXPRESSION]       = leave_boolexpr;
@@ -463,7 +475,7 @@ Visitor* create_treeview_visitor() {
     leave_stmt_list[DECLARATION_STATEMENT]    = leave_declstmt;
     leave_stmt_list[IF_STATEMENT]             = leave_ifstmt;
     leave_stmt_list[STATEMENT_BLOCK]          = leave_stmtblock;
-    
+    leave_stmt_list[WHILE_STATEMENT]          = leave_whilestmt;
 
     visitor->enter_expr_list = enter_expr_list;
     visitor->leave_expr_list = leave_expr_list;
@@ -472,6 +484,10 @@ Visitor* create_treeview_visitor() {
     visitor->notify_expr_list = NULL;
     visitor->if_codegen_expr_list = NULL;
     visitor->if_codegen_stmt_list = NULL;
+    visitor->while_codegen_expr_list = NULL;
+    visitor->while_codegen_stmt_list = NULL;
+    
+    
     
     
 

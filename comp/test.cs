@@ -1,15 +1,5 @@
+int i = 0;
 
-if(TRUE_T){
-	print();
-	print();
-}else{
-	print();
-	print();
+while(i < 10){
+	i++;
 }
-
-if(TRUE_T){
-	print();
-}elsif(FALSE){
-	print();
-}
-
