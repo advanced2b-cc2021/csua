@@ -335,6 +335,13 @@ static void exec_disasm(CS_Executable* exec) {
             case SVM_CJMP:
             case SVM_PUSH_LABEL:
             case SVM_POP_LABEL: {
+                #ifdef ENABLE_ADDRESS_OUTPUT
+                char address32[11];
+                memset(address32, 0, 11);
+                sprintf(address32, "0x%08x", (uint32_t)i);
+                add_string(&dinfo, address32);
+                add_string(&dinfo, "\t");
+                #endif
                 add_string(&dinfo, oinfo->opname);
                 break;
             }

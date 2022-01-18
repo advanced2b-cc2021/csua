@@ -2,7 +2,7 @@
 CC = /usr/bin/gcc
 
 TARGET = svm
-CFLAGS = -c -g -DDEBUG
+CFLAGS = -c -g -DDEBUG -DSVM_TRACE
 LINK = -lm
 MEMORY = ../memory/memory.o ../memory/storage.o
 

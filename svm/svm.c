@@ -480,7 +480,11 @@ static void svm_run(SVM_VirtualMachine* svm) {
 
     uint8_t op = 0;
     while(running) {
-        switch (op = fetch(svm)) {
+        op = fetch(svm);
+        #ifdef SVM_TRACE
+        fprintf(stderr, "0x%08x\t%s\n", svm->pc - 1, svm_opcode_info[op].opname);
+        #endif                      
+        switch (op) {
             case SVM_PUSH_INT: { // push from constant pool
                 uint16_t s_idx = fetch2(svm);
                 int v = read_static_int(svm, s_idx);
@@ -755,7 +759,6 @@ static void svm_run(SVM_VirtualMachine* svm) {
                 exit(1);                
             }
         }
-                              
         running = svm->pc < svm->code_size;
     }
     show_status(svm);

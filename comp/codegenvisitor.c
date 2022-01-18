@@ -841,7 +841,7 @@ static void enter_stmtblock(Statement* stmt, Visitor* visitor) {
 static void leave_ifstmt(Statement* stmt, Visitor* visitor) {
     CodegenVisitor* codegenVisitor = (CodegenVisitor*)visitor;
     //最後のSVM_JUMPかSV_POP_LABEL命令を消してSVM_POP_LABELに変更する
-    codegenVisitor->pos--;
+    //codegenVisitor->pos--;
     gen_byte_code(codegenVisitor, SVM_POP_LABEL);
 
     //if文の終わりのlabelを記憶していた場所に張る
