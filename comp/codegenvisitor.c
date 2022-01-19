@@ -823,7 +823,6 @@ static void leave_whilestmt(Statement *stmt, Visitor* visitor){
     fprintf(stderr, "leave while stmt\n");
     CodegenVisitor* codegenVisitor = (CodegenVisitor*)visitor;	
     gen_byte_code(codegenVisitor, SVM_JUMP);
-    //codegenVisitor->pos--;
     uint32_t replace_point = pop_label_replacement_point(codegenVisitor);
     replace_4byte_code(codegenVisitor, replace_point, codegenVisitor->pos);
     gen_byte_code(codegenVisitor, SVM_POP_LABEL);
@@ -930,7 +929,7 @@ static void leave_inner_while(Statement* stmt, Visitor* visitor) {
 }
 
 static void leave_inner_else(Statement* stmt, Visitor* visitor) {
-    gen_byte_code((CodegenVisitor*)visitor, SVM_POP_LABEL);
+    gen_byte_code((CodegenVisitor*)visitor, SVM_JUMP);
 }
 
 CodegenVisitor* create_codegen_visitor(CS_Compiler* compiler, CS_Executable *exec) {

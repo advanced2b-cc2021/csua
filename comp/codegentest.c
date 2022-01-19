@@ -424,7 +424,7 @@ int main(int argc, char* argv[]) {
         }
         */
         delete_visitor(visitor);
-    }    
+    }
     
     fclose(fin);
     CS_delete_compiler(compiler);
