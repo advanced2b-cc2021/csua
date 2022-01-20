@@ -823,7 +823,6 @@ static void leave_whilestmt(Statement *stmt, Visitor* visitor){
     fprintf(stderr, "leave while stmt\n");
     CodegenVisitor* codegenVisitor = (CodegenVisitor*)visitor;	
     gen_byte_code(codegenVisitor, SVM_JUMP);
-    //codegenVisitor->pos--;
     uint32_t replace_point = pop_label_replacement_point(codegenVisitor);
     replace_4byte_code(codegenVisitor, replace_point, codegenVisitor->pos);
     gen_byte_code(codegenVisitor, SVM_POP_LABEL);
@@ -841,7 +840,7 @@ static void enter_stmtblock(Statement* stmt, Visitor* visitor) {
 static void leave_ifstmt(Statement* stmt, Visitor* visitor) {
     CodegenVisitor* codegenVisitor = (CodegenVisitor*)visitor;
     //最後のSVM_JUMPかSV_POP_LABEL命令を消してSVM_POP_LABELに変更する
-    codegenVisitor->pos--;
+    //codegenVisitor->pos--;
     gen_byte_code(codegenVisitor, SVM_POP_LABEL);
 
     //if文の終わりのlabelを記憶していた場所に張る
@@ -930,7 +929,7 @@ static void leave_inner_while(Statement* stmt, Visitor* visitor) {
 }
 
 static void leave_inner_else(Statement* stmt, Visitor* visitor) {
-    gen_byte_code((CodegenVisitor*)visitor, SVM_POP_LABEL);
+    //gen_byte_code((CodegenVisitor*)visitor, SVM_JUMP);
 }
 
 CodegenVisitor* create_codegen_visitor(CS_Compiler* compiler, CS_Executable *exec) {

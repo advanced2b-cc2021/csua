@@ -54,8 +54,8 @@ OpcodeInfo svm_opcode_info[] = {
     {"push_function", "i", 0},
     {"invoke", "", -1},
     {"return", "", -1},
-    {"JUMP", "", 1},
-    {"CJMP", "", 2},
+    {"JUMP", "", -1},
+    {"CJMP", "", -2},
     {"push_label", "4", 1},
     {"pop_label", "", -1},
 };

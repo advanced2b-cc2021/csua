@@ -1,6 +1,6 @@
 TARGET = scant
 CC = /usr/bin/gcc
-CFLAGS = -g -DDEBUG
+CFLAGS = -g -DDEBUG -DENABLE_ADDRESS_OUTPUT
 MEMORY = ../memory/memory.o ../memory/storage.o
 CODEGEN = ../svm/opinfo.o codegenvisitor.o
 OBJS = y.tab.o scanner.o keyword.o create.o visitor.o traversor.o util.o interface.o meanvisitor.o
